@@ -1,0 +1,116 @@
+use ahash::AHashMap;
+use itertools::Itertools;
+use std::{collections::BTreeMap, pin::Pin};
+
+use crate::{env::PREFIX, util::string::uppercase_first_char};
+
+pub type RunFuture = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>>;
+pub type RunFunction = Box<dyn Fn(serenity::client::Context, serenity::model::channel::Message, CommandData) -> RunFuture + Send + Sync>;
+
+pub const DEFAULT_CATEGORY: &str = "uncategorized";
+
+#[derive(Debug, Clone, Copy)]
+pub struct CommandMetadata {
+    pub names: &'static [&'static str],
+    pub description: &'static str,
+    pub usage: &'static str,
+    pub category: &'static str,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CommandData {
+    pub content: String,
+    pub cmd_content: String,
+    pub args: Vec<String>,
+}
+
+#[macro_export]
+macro_rules! command {
+    (
+        names: $names:tt,
+        $(description: $desc:literal,)?
+        $(usage: $usage:literal,)?
+        $(category: $cat:literal,)?
+        run: |$ctx:ident, $msg:ident, $content:ident| $body:block
+        $(,)*
+    ) => {
+        pub const METADATA: crate::commands::CommandMetadata = crate::commands::CommandMetadata {
+            names: command!(@names: $names),
+            description: [$($desc,)? "No description provided"][0],
+            usage: [$($usage,)? "No usage provided"][0],
+            category: [$($cat,)? crate::commands::DEFAULT_CATEGORY][0],
+        };
+        pub async fn run($ctx: serenity::client::Context, $msg: serenity::model::channel::Message, $content: crate::CommandData) -> anyhow::Result<()> $body
+    };
+    (@names: $name:literal) => { &[$name] };
+    (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
+}
+
+macro_rules! commands {
+    ($($name:ident $(: $str:literal)?),* $(,)?) => {
+        $(
+            $(#[path = $str])?
+            mod $name;
+        )*
+
+        lazy_static::lazy_static! {
+            static ref COMMANDS: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
+            static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
+                let mut commands_map: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = BTreeMap::new();
+                [ $($name::METADATA),* ].iter().for_each(|c| commands_map.entry(c.category).or_insert(Vec::with_capacity(COMMANDS.len())).push(c));
+                commands_map
+            };
+            static ref METADATA: AHashMap<&'static str, CommandMetadata> = {
+                let mut map: AHashMap<&'static str, CommandMetadata> = AHashMap::new();
+                $(
+                    for &command_name in $name::METADATA.names {
+                        map.insert(command_name, $name::METADATA);
+                    }
+                )*
+                map
+            };
+            static ref RUN: AHashMap<&'static str, RunFunction> = {
+                let mut map: AHashMap<&'static str, RunFunction> = AHashMap::new();
+                $(
+                    for &command_name in $name::METADATA.names {
+                        let handler: RunFunction = Box::new(|ctx, msg, cont| Box::pin($name::run(ctx, msg, cont)));
+                        map.insert(command_name, handler);
+                    }
+                )*
+                map
+            };
+            static ref ALIASES: AHashMap<&'static str, &'static[&'static str]> = {
+                let mut map = AHashMap::new();
+                $(
+                    for &command_name in $name::METADATA.names {
+                        map.insert(command_name, $name::METADATA.names.as_ref());
+                    }
+                )*
+                map
+            };
+        }
+    };
+}
+
+pub fn get_run(command_name: &str) -> Option<&'static RunFunction> {
+    RUN.get(command_name)
+}
+
+pub fn get_metadata(command_name: &str) -> Option<&'static CommandMetadata> {
+    METADATA.get(command_name)
+}
+
+pub fn check_category_command(category: &str) -> Option<String> {
+    CATEGORIES.get(category)
+        .and_then(|metadatas| {
+            #[allow(unstable_name_collisions)]
+            let commands: String = metadatas.iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
+            Some(format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", &*PREFIX, uppercase_first_char(category)))
+        })
+}
+
+commands![
+    help,
+    ping,
+];
