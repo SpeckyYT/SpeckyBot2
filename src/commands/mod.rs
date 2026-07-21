@@ -8,6 +8,8 @@ pub type RunFuture = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>
 pub type RunFunction = Box<dyn Fn(serenity::client::Context, serenity::model::channel::Message, CommandData) -> RunFuture + Send + Sync>;
 
 pub const DEFAULT_CATEGORY: &str = "uncategorized";
+pub const DEFUALT_DESCRIPTION: &str = "No description provided";
+pub const DEFUALT_USAGE: &str = "No usage provided";
 
 #[derive(Debug, Clone, Copy)]
 pub struct CommandMetadata {
@@ -37,8 +39,8 @@ macro_rules! command {
     ) => {
         pub const METADATA: crate::commands::CommandMetadata = crate::commands::CommandMetadata {
             names: command!(@names: $names),
-            description: [$($desc,)? "No description provided"][0],
-            usage: [$($usage,)? "No usage provided"][0],
+            description: [$($desc,)? crate::commands::DEFUALT_DESCRIPTION][0],
+            usage: [$($usage,)? crate::commands::DEFUALT_USAGE][0],
             category: [$($cat,)? crate::commands::DEFAULT_CATEGORY][0],
         };
         pub async fn run($ctx: serenity::client::Context, $msg: serenity::model::channel::Message, $content: crate::CommandData) -> anyhow::Result<()> $body
@@ -113,4 +115,5 @@ pub fn check_category_command(category: &str) -> Option<String> {
 commands![
     help,
     ping,
+    update: "owner/update.rs",
 ];
