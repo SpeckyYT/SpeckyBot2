@@ -1,4 +1,4 @@
-use serenity::all::CreateMessage;
+use serenity::all::{Color, CreateMessage};
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
@@ -10,6 +10,7 @@ use crate::env::PREFIX;
 use crate::util::embed::default_embed;
 
 mod env;
+mod events;
 mod commands;
 mod util;
 
@@ -36,10 +37,18 @@ impl EventHandler for Bot {
                     args: arguments_iter.map(|s| s.to_string()).collect(),
                 };
 
-                let future = handler(ctx, msg, cmd_data);
                 tokio::spawn(async move {
+                    let future = handler(&ctx, &msg, cmd_data);
                     if let Err(err) = future.await {
-                        println!("command failed: {err:#}");
+                        let _ = msg.channel_id.send_message(
+                            &ctx.http,
+                            CreateMessage::new().embed(
+                                default_embed(Some(&ctx))
+                                .title("Error")
+                                .description(format!("{err}"))
+                                .color(Color::RED)
+                            ),
+                        ).await;
                     }
                 });
             },

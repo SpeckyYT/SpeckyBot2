@@ -4,8 +4,16 @@ use std::{collections::BTreeMap, pin::Pin};
 
 use crate::{env::PREFIX, util::string::uppercase_first_char};
 
-pub type RunFuture = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>>;
-pub type RunFunction = Box<dyn Fn(serenity::client::Context, serenity::model::channel::Message, CommandData) -> RunFuture + Send + Sync>;
+pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
+pub type RunFunction = Box<
+    dyn for<'a> Fn(
+        &'a serenity::client::Context,
+        &'a serenity::model::channel::Message,
+        CommandData,
+    ) -> RunFuture<'a>
+        + Send
+        + Sync,
+>;
 
 pub const DEFAULT_CATEGORY: &str = "uncategorized";
 pub const DEFUALT_DESCRIPTION: &str = "No description provided";
@@ -43,7 +51,7 @@ macro_rules! command {
             usage: [$($usage,)? crate::commands::DEFUALT_USAGE][0],
             category: [$($cat,)? crate::commands::DEFAULT_CATEGORY][0],
         };
-        pub async fn run($ctx: serenity::client::Context, $msg: serenity::model::channel::Message, $content: crate::CommandData) -> anyhow::Result<()> $body
+        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: crate::CommandData) -> anyhow::Result<()> $body
     };
     (@names: $name:literal) => { &[$name] };
     (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
