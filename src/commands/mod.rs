@@ -9,7 +9,7 @@ pub type RunFunction = Box<
     dyn for<'a> Fn(
         &'a serenity::client::Context,
         &'a serenity::model::channel::Message,
-        CommandData,
+        ParsedCommandData,
     ) -> RunFuture<'a>
         + Send
         + Sync,
@@ -29,7 +29,7 @@ pub struct CommandMetadata {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct CommandData {
+pub struct ParsedCommandData {
     pub content: String,
     pub cmd_content: String,
     pub args: Vec<String>,
@@ -51,7 +51,7 @@ macro_rules! command {
             usage: [$($usage,)? crate::commands::DEFUALT_USAGE][0],
             category: [$($cat,)? crate::commands::DEFAULT_CATEGORY][0],
         };
-        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: crate::CommandData) -> anyhow::Result<()> $body
+        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: crate::ParsedCommandData) -> anyhow::Result<()> $body
     };
     (@names: $name:literal) => { &[$name] };
     (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
