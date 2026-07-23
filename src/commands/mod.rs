@@ -103,10 +103,17 @@ macro_rules! commands {
     };
 }
 
+#[inline]
+pub fn get_metadata_and_run(command_name: &str) -> Option<(&'static CommandMetadata, &'static RunFunction)> {
+    get_metadata(command_name).zip(get_run(command_name))
+}
+
+#[inline]
 pub fn get_run(command_name: &str) -> Option<&'static RunFunction> {
     RUN.get(command_name)
 }
 
+#[inline]
 pub fn get_metadata(command_name: &str) -> Option<&'static CommandMetadata> {
     METADATA.get(command_name)
 }

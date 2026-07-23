@@ -1,6 +1,15 @@
 use serenity::all::{Color, Context, CreateMessage, Message};
 
-use crate::{commands::{self, ParsedCommandData}, env::PREFIX, util::embed::default_embed};
+use crate::{commands::{self, ParsedCommandData, get_metadata_and_run}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
+
+const ONWER_ERROR: &str    =  "👮‍♂️ You aren't the bot owner.";
+// const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
+// const NSFW_ERROR: &str     =  "🔞 This command is only allowed in NSFW channels.";
+// const USER_PERM_ERROR: &str =  "🚷 You don't have the required permissions for that command.";
+// const SERVER_ERROR: &str   =  "⛔ This command isn't available on this server.";
+// const CHANNEL_ERROR: &str  =  "⛔ This command isn't available in this channel.";
+// const USER_ERROR: &str     =  "⛔ This command isn't available for you.";
+// const OFFICIAL_ERROR: &str =  "🤖 This is the official SpeckyBot.";
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
@@ -13,8 +22,22 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
     let ctx = ctx.clone();
     let msg = msg.clone();
 
-    match commands::get_run(&lowercase_command) {
-        Some(handler) => {
+    let metadata_and_run = get_metadata_and_run(&lowercase_command);
+
+    match metadata_and_run {
+        Some((metadata, run)) => {
+            if metadata.category == "owner" && !is_owner(msg.author.id.to_string().as_str()) {
+                // TODO: "illegal" feature
+                let _ = msg.channel_id.send_message(
+                    &ctx.http,
+                    CreateMessage::new().embed(
+                        error_embed()
+                        .description(ONWER_ERROR)
+                    )
+                ).await;
+                return;
+            }
+
             let cmd_data = ParsedCommandData {
                 content: content.to_string(),
                 cmd_content: content[command.len()..].trim_start().to_string(),
@@ -22,15 +45,13 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
             };
 
             tokio::spawn(async move {
-                let future = handler(&ctx, &msg, cmd_data);
+                let future = run(&ctx, &msg, cmd_data);
                 if let Err(err) = future.await {
                     let _ = msg.channel_id.send_message(
                         &ctx.http,
                         CreateMessage::new().embed(
-                            default_embed(Some(&ctx))
-                            .title("Error")
+                            error_embed()
                             .description(format!("{err}"))
-                            .color(Color::RED)
                         ),
                     ).await;
                 }

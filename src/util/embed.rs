@@ -25,6 +25,13 @@ pub fn default_embed(ctx: Option<&Context>) -> CreateEmbed {
     embed
 }
 
+#[inline]
+pub fn error_embed() -> CreateEmbed {
+    CreateEmbed::new()
+    .title("ERROR!")
+    .color(Color::from_rgb(255, 0, 0))
+}
+
 // pub fn global_chat_embed(msg: Message) {
 // TODO
 // }
