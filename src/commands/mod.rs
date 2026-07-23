@@ -65,57 +65,30 @@ macro_rules! commands {
         )*
 
         lazy_static::lazy_static! {
-            static ref COMMANDS: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
-            static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
-                let mut commands_map: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = BTreeMap::new();
-                [ $($name::METADATA),* ].iter().for_each(|c| commands_map.entry(c.category).or_insert(Vec::with_capacity(COMMANDS.len())).push(c));
-                commands_map
-            };
-            static ref METADATA: AHashMap<&'static str, CommandMetadata> = {
-                let mut map: AHashMap<&'static str, CommandMetadata> = AHashMap::new();
-                $(
-                    for &command_name in $name::METADATA.names {
-                        map.insert(command_name, $name::METADATA);
-                    }
-                )*
-                map
-            };
-            static ref RUN: AHashMap<&'static str, RunFunction> = {
-                let mut map: AHashMap<&'static str, RunFunction> = AHashMap::new();
-                $(
-                    for &command_name in $name::METADATA.names {
-                        let handler: RunFunction = Box::new(|ctx, msg, cont| Box::pin($name::run(ctx, msg, cont)));
-                        map.insert(command_name, handler);
-                    }
-                )*
-                map
-            };
-            static ref ALIASES: AHashMap<&'static str, &'static[&'static str]> = {
+            static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
+            static ref COMMANDS_MAP: AHashMap<&'static str, (CommandMetadata, RunFunction)> = {
                 let mut map = AHashMap::new();
                 $(
                     for &command_name in $name::METADATA.names {
-                        map.insert(command_name, $name::METADATA.names.as_ref());
+                        let metadata = $name::METADATA;
+                        let run: RunFunction = Box::new(|ctx, msg, cont| Box::pin($name::run(ctx, msg, cont)));
+                        map.insert(command_name, (metadata, run));
                     }
                 )*
                 map
+            };
+            static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
+                let mut commands_map: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = BTreeMap::new();
+                COMMANDS_ARRAY.into_iter().for_each(|c| commands_map.entry(c.category).or_insert(Vec::with_capacity(COMMANDS_ARRAY.len())).push(c));
+                commands_map
             };
         }
     };
 }
 
 #[inline]
-pub fn get_metadata_and_run(command_name: &str) -> Option<(&'static CommandMetadata, &'static RunFunction)> {
-    get_metadata(command_name).zip(get_run(command_name))
-}
-
-#[inline]
-pub fn get_run(command_name: &str) -> Option<&'static RunFunction> {
-    RUN.get(command_name)
-}
-
-#[inline]
-pub fn get_metadata(command_name: &str) -> Option<&'static CommandMetadata> {
-    METADATA.get(command_name)
+pub fn get_command(command_name: &str) -> Option<&'static (CommandMetadata, RunFunction)> {
+    COMMANDS_MAP.get(command_name)
 }
 
 pub fn check_category_command(category: &str) -> Option<String> {

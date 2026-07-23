@@ -3,11 +3,13 @@ use serenity::all::EditMessage;
 use tokio::process::Command;
 
 crate::command! {
-    names: ["update"],
+    names: "update",
     category: "owner",
     run: |ctx, msg, _data| {
         let mut statuses: Statuses = vec![
-            (Status::Queued(false), "Pull repository", &["git", "pull"]),
+            (Status::Queued(false), "Reset repository instance", &["git", "reset", "--hard"]),
+            (Status::Queued(false), "Fetch repository", &["git", "fetch", "--all"]),
+            (Status::Queued(false), "Pull repository", &["git", "pull", "origin"]),
             (Status::Queued(true), "Compile", &["cargo", "build", "--release"]),
             (Status::Queued(false), "Restart", &["pm2", "restart", "speckybot"]),
         ];

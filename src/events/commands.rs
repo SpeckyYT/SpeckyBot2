@@ -1,15 +1,15 @@
-use serenity::all::{Color, Context, CreateMessage, Message};
+use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, ParsedCommandData, get_metadata_and_run}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
+use crate::{commands::{self, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
 
-const ONWER_ERROR: &str    =  "👮‍♂️ You aren't the bot owner.";
+const ONWER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
-// const NSFW_ERROR: &str     =  "🔞 This command is only allowed in NSFW channels.";
+// const NSFW_ERROR: &str      =  "🔞 This command is only allowed in NSFW channels.";
 // const USER_PERM_ERROR: &str =  "🚷 You don't have the required permissions for that command.";
-// const SERVER_ERROR: &str   =  "⛔ This command isn't available on this server.";
-// const CHANNEL_ERROR: &str  =  "⛔ This command isn't available in this channel.";
-// const USER_ERROR: &str     =  "⛔ This command isn't available for you.";
-// const OFFICIAL_ERROR: &str =  "🤖 This is the official SpeckyBot.";
+// const SERVER_ERROR: &str    =  "⛔ This command isn't available on this server.";
+// const CHANNEL_ERROR: &str   =  "⛔ This command isn't available in this channel.";
+// const USER_ERROR: &str      =  "⛔ This command isn't available for you.";
+// const OFFICIAL_ERROR: &str  =  "🤖 This is the official SpeckyBot.";
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
@@ -22,7 +22,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
     let ctx = ctx.clone();
     let msg = msg.clone();
 
-    let metadata_and_run = get_metadata_and_run(&lowercase_command);
+    let metadata_and_run = get_command(&lowercase_command);
 
     match metadata_and_run {
         Some((metadata, run)) => {

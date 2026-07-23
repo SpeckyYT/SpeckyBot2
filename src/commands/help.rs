@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS, CommandMetadata}, util::{bot_user::avatar_url, embed::default_embed}};
+use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, util::{bot_user::avatar_url, embed::default_embed}};
 
 macro_rules! holy_cow {
     ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {
@@ -41,8 +41,8 @@ crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
     run: |ctx, msg, data| {
         let embed = default_embed(Some(&ctx));
-        let embed = match data.args.first().map(|cmd| commands::get_metadata(&cmd.to_lowercase())) {
-            Some(Some(CommandMetadata { names, description, category, usage, .. })) => {
+        let embed = match data.args.first().map(|cmd| commands::get_command(&cmd.to_lowercase())) {
+            Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
                 // COMMAND FOUND
                 let mut command_info = format!(
                     "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {category}\n**Description:** {description}\n **Usage:** {usage}\n",
@@ -80,7 +80,7 @@ crate::command! {
                     .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", &bot_user.name, &*PREFIX))
                     .field("Instructions", format!("Simple! Just type `{}<category>` ||(without <> obviously)|| to get the available commands of the categories!", &*PREFIX), false)
                     .field("Did you know that", &*DID_U_KNOW[rand::random_range(0..DID_U_KNOW.len())], false)
-                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot | Total Commands: {}", COMMANDS.len())).icon_url(avatar_url(&ctx)))
+                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(avatar_url(&ctx)))
             }
         };
 
