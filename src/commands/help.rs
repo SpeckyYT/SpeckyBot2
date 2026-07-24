@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, util::{bot_user::avatar_url, embed::default_embed}};
+use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, env::is_owner, util::{bot_user::avatar_url, embed::default_embed}};
 
 macro_rules! holy_cow {
     ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {
@@ -64,6 +64,12 @@ crate::command! {
                 // GENERAL HELP MESSAGE
                 let bot_user = ctx.cache.current_user();
 
+                let filtered_categories = CATEGORIES.iter()
+                .filter(|&c| match *c.0 {
+                    "owner" => is_owner(&msg.author.id.to_string()),
+                    _ => true
+                });
+
                 let mut table = AsciiTable::new();
                 table.column(0)
                     .set_header("category")
@@ -72,7 +78,7 @@ crate::command! {
                     .set_header("commands")
                     .set_align(ascii_table::Align::Right);
                 let mut table_chars = Vec::new();
-                let categories_table: Vec<_> = CATEGORIES.iter().map(|(&x,y)| [Cow::Borrowed(x), Cow::Owned(y.len().to_string())]).collect();
+                let categories_table: Vec<_> = filtered_categories.map(|(&x,y)| [Cow::Borrowed(x), Cow::Owned(y.len().to_string())]).collect();
                 table.writeln(&mut table_chars, &categories_table)?;
                 let table_string = format!("```\n{}\n```", String::from_utf8_lossy(&table_chars));
 
