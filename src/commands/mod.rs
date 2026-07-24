@@ -45,13 +45,13 @@ macro_rules! command {
         run: |$ctx:ident, $msg:ident, $content:ident| $body:block
         $(,)*
     ) => {
-        pub const METADATA: crate::commands::CommandMetadata = crate::commands::CommandMetadata {
+        pub const METADATA: $crate::commands::CommandMetadata = $crate::commands::CommandMetadata {
             names: command!(@names: $names),
-            description: [$($desc,)? crate::commands::DEFUALT_DESCRIPTION][0],
-            usage: [$($usage,)? crate::commands::DEFUALT_USAGE][0],
-            category: [$($cat,)? crate::commands::DEFAULT_CATEGORY][0],
+            description: [$($desc,)? $crate::commands::DEFUALT_DESCRIPTION][0],
+            usage: [$($usage,)? $crate::commands::DEFUALT_USAGE][0],
+            category: [$($cat,)? $crate::commands::DEFAULT_CATEGORY][0],
         };
-        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: crate::ParsedCommandData) -> anyhow::Result<()> $body
+        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: $crate::ParsedCommandData) -> anyhow::Result<()> $body
     };
     (@names: $name:literal) => { &[$name] };
     (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
@@ -93,10 +93,10 @@ pub fn get_command(command_name: &str) -> Option<&'static (CommandMetadata, RunF
 
 pub fn check_category_command(category: &str) -> Option<String> {
     CATEGORIES.get(category)
-        .and_then(|metadatas| {
+        .map(|metadatas| {
             #[allow(unstable_name_collisions)]
             let commands: String = metadatas.iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
-            Some(format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", &*PREFIX, uppercase_first_char(category)))
+            format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", &*PREFIX, uppercase_first_char(category))
         })
 }
 

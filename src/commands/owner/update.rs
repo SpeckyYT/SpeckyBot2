@@ -38,7 +38,7 @@ crate::command! {
                 },
             };
 
-            bot_msg.edit(&ctx.http, EditMessage::new().content(draw_statuses(&statuses, fail.as_ref().map(|s| s.as_str())))).await?;
+            bot_msg.edit(&ctx.http, EditMessage::new().content(draw_statuses(&statuses, fail.as_deref()))).await?;
 
             if fail.is_some() { break }
         }

@@ -58,13 +58,10 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
             });
         },
         None => {
-            match commands::check_category_command(&lowercase_command) {
-                Some(category_help) => {
-                    tokio::spawn(async move {
-                        let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await; 
-                    });
-                },
-                None => {}
+            if let Some(category_help) = commands::check_category_command(&lowercase_command) {
+                tokio::spawn(async move {
+                    let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await; 
+                });
             };
         },
     }

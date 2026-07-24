@@ -40,7 +40,7 @@ holy_cow![
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
     run: |ctx, msg, data| {
-        let embed = default_embed(Some(&ctx));
+        let embed = default_embed(Some(ctx));
         let embed = match data.args.first().map(|cmd| commands::get_command(&cmd.to_lowercase())) {
             Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
                 // COMMAND FOUND
@@ -86,7 +86,7 @@ crate::command! {
                     .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", &bot_user.name, &*PREFIX))
                     .field("Instructions", format!("Simple! Just type `{}<category>` ||(without <> obviously)|| to get the available commands of the categories!", &*PREFIX), false)
                     .field("Did you know that", &*DID_U_KNOW[rand::random_range(0..DID_U_KNOW.len())], false)
-                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(avatar_url(&ctx)))
+                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(avatar_url(ctx)))
             }
         };
 

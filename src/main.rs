@@ -2,7 +2,6 @@ use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
-use tokio;
 
 use crate::commands::ParsedCommandData;
 use crate::env::PREFIX;
