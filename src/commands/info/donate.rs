@@ -3,7 +3,7 @@ use serenity::all::{CreateEmbedFooter, CreateMessage};
 use crate::util::{bot_user::avatar_url, embed::default_embed};
 
 crate::command! {
-    names: ["donate","donations","donation","donator","donator","patreon"],
+    names: ["donate","donations","donation","donator","patreon"],
     category: "info",
     run: |ctx, msg, _data| {
         let _ = msg.channel_id.send_message(
