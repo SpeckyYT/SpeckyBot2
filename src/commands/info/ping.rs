@@ -2,6 +2,7 @@ use serenity::all::EditMessage;
 
 crate::command! {
     names: ["ping", "pong", "pin", "pon"],
+    category: "info",
     run: |ctx, msg, _data| {
         let mut bot_msg = msg.channel_id.say(&ctx.http, "pong").await?;
         let time = bot_msg.timestamp.to_utc() - msg.timestamp.to_utc();

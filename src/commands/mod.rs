@@ -101,7 +101,9 @@ pub fn check_category_command(category: &str) -> Option<String> {
 }
 
 commands![
-    help,
-    ping,
     update: "owner/update.rs",
+    donate: "info/donate.rs",
+    help: "info/help.rs",
+    invite: "info/invite.rs",
+    ping: "info/ping.rs",
 ];

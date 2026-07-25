@@ -35,10 +35,12 @@ holy_cow![
     // "in any text channel, you can include `[NO-MEDIA]` in the channel topic, so nobody can share links/images in the channel!",
     // "in any text channel, you can include `[NO-NSFW]` in the channel topic, so every NSFW command is not executable!",
     format "commands usually have aliases? Just execute the command `{}help <command>` to check them!" (&*PREFIX),
-    "most of the people don't read the helpful tricks that are written here?"
+    "most of the people don't read the helpful tricks that are written here?",
+    format "I am a bot and I'm forced for my entire life to do this 😭 Please send help, `{}donation`" (&*PREFIX),
 ];
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
+    category: "info",
     run: |ctx, msg, data| {
         let embed = default_embed(Some(ctx));
         let embed = match data.args.first().map(|cmd| commands::get_command(&cmd.to_lowercase())) {
