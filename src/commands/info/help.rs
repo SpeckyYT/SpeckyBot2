@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, env::is_owner, util::{bot_user::avatar_url, embed::default_embed}};
+use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, env::is_owner, util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 macro_rules! holy_cow {
     ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {
@@ -88,7 +88,7 @@ crate::command! {
                     .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", &bot_user.name, &*PREFIX))
                     .field("Instructions", format!("Simple! Just type `{}<category>` ||(without <> obviously)|| to get the available commands of the categories!", &*PREFIX), false)
                     .field("Did you know that", &*DID_U_KNOW[rand::random_range(0..DID_U_KNOW.len())], false)
-                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(avatar_url(ctx)))
+                    .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(bot_avatar_url(ctx)))
             }
         };
 

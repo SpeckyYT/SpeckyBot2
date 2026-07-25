@@ -1,6 +1,6 @@
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::util::{bot_user::avatar_url, embed::default_embed};
+use crate::util::{bot_user::bot_avatar_url, embed::default_embed};
 
 crate::command! {
     names: ["donate","donations","donation","donator","patreon"],
@@ -12,7 +12,7 @@ crate::command! {
                 default_embed(Some(ctx))
                 .title("Donate here!")
                 .url("https://www.paypal.me/speckyy")
-                .footer(CreateEmbedFooter::new("Thank you all for the support!").icon_url(avatar_url(ctx)))
+                .footer(CreateEmbedFooter::new("Thank you all for the support!").icon_url(bot_avatar_url(ctx)))
             )
         ).await;
 

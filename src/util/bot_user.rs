@@ -1,6 +1,12 @@
-use serenity::all::Context;
+use serenity::all::{Context, User};
 
-pub fn avatar_url(ctx: &Context) -> String {
+#[inline]
+pub fn bot_avatar_url(ctx: &Context) -> String {
     let bot_user = ctx.cache.current_user();
-    bot_user.avatar_url().unwrap_or(bot_user.default_avatar_url())
+    user_avatar_url(&bot_user)
+}
+
+#[inline]
+pub fn user_avatar_url(user: &User) -> String {
+    user.avatar_url().unwrap_or(user.default_avatar_url())
 }
