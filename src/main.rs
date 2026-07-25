@@ -6,10 +6,11 @@ use serenity::prelude::*;
 use crate::commands::ParsedCommandData;
 use crate::env::PREFIX;
 
-mod env;
-mod events;
-mod commands;
-mod util;
+pub mod env;
+pub mod loader;
+pub mod events;
+pub mod commands;
+pub mod util;
 
 struct Bot;
 
@@ -28,6 +29,8 @@ impl EventHandler for Bot {
 #[tokio::main]
 async fn main() {
     let _ = env::DOTENV.as_ref();
+
+    loader::load();
 
     // Set gateway intents, which decides what events the bot will be notified about
     let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;

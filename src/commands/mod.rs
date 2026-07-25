@@ -28,7 +28,7 @@ pub struct CommandMetadata {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ParsedCommandData {
     pub content: String,
     pub cmd_content: String,
@@ -51,7 +51,27 @@ macro_rules! command {
             usage: [$($usage,)? $crate::commands::DEFUALT_USAGE][0],
             category: [$($cat,)? $crate::commands::DEFAULT_CATEGORY][0],
         };
-        pub async fn run($ctx: &serenity::client::Context, $msg: &serenity::model::channel::Message, $content: $crate::ParsedCommandData) -> anyhow::Result<()> $body
+        
+        pub async fn run(
+            $ctx: &serenity::client::Context,
+            $msg: &serenity::model::channel::Message,
+            $content: $crate::ParsedCommandData,
+        ) -> anyhow::Result<()> $body
+
+        // // Poise slash command version
+        // #[poise::command(slash_command)]
+        // pub async fn slash_command_impl(
+        //     $ctx: poise::Context<'_, (), serenity::prelude::SerenityError>,
+        // ) -> Result<(), poise::serenity_prelude::Error> {
+        //     // Adapter to call your existing run function
+        //     let msg = $ctx.msg().cloned().unwrap_or_else(|| {
+        //         // Create a minimal message for slash commands if needed
+        //         serenity::model::channel::Message::default()
+        //     });
+            
+        //     let _ = run(&$ctx.serenity_context(), &msg, Default::default()).await;
+        //     Ok(())
+        // }
     };
     (@names: $name:literal) => { &[$name] };
     (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
@@ -65,19 +85,21 @@ macro_rules! commands {
         )*
 
         lazy_static::lazy_static! {
-            static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
-            static ref COMMANDS_MAP: AHashMap<&'static str, (CommandMetadata, RunFunction)> = {
+            pub static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
+            pub static ref COMMANDS_MAP: AHashMap<&'static str, (CommandMetadata, RunFunction)> = {
                 let mut map = AHashMap::new();
                 $(
                     for &command_name in $name::METADATA.names {
                         let metadata = $name::METADATA;
                         let run: RunFunction = Box::new(|ctx, msg, cont| Box::pin($name::run(ctx, msg, cont)));
-                        map.insert(command_name, (metadata, run));
+                        if map.insert(command_name, (metadata, run)).is_some() {
+                            panic!("Duplicate command name `{command_name}`");
+                        }
                     }
                 )*
                 map
             };
-            static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
+            pub static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
                 let mut commands_map: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = BTreeMap::new();
                 COMMANDS_ARRAY.into_iter().for_each(|c| commands_map.entry(c.category).or_insert(Vec::with_capacity(COMMANDS_ARRAY.len())).push(c));
                 commands_map
