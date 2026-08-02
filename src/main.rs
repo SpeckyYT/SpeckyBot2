@@ -1,4 +1,4 @@
-use serenity::all::GuildChannel;
+use serenity::all::{ChannelId, GuildChannel, GuildId, MessageId, MessageUpdateEvent};
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
@@ -23,7 +23,7 @@ impl EventHandler for Bot {
         println!("{} is connected!", ready.user.name);
 
         tokio::join!(
-            events::global_chat::on_ready(&ctx, &ready),
+            events::global_chat::channel::on_ready(&ctx, &ready),
         );
     }
     async fn message(&self, ctx: Context, msg: Message) {
@@ -31,12 +31,31 @@ impl EventHandler for Bot {
 
         tokio::join!(
             events::commands::on_message(&ctx, &msg),
-            events::global_chat::on_message(&ctx, &msg),
+            events::global_chat::message::on_message(&ctx, &msg),
+        );
+    }
+    async fn message_update(&self, ctx: Context, old_if_available: Option<Message>, new: Option<Message>, event: MessageUpdateEvent) {
+        if let Some(author) = old_if_available.as_ref().or(new.as_ref()).map(|m| &m.author).or(event.author.as_ref()) {
+            if author.bot { return }
+        }
+
+        tokio::join!(
+            events::global_chat::message::message_update(&ctx, old_if_available.as_ref(), new.as_ref(), &event),
+        );
+    }
+    async fn message_delete(&self, ctx: Context, _channel_id: ChannelId, deleted_message_id: MessageId, _guild_id: Option<GuildId>) {
+        tokio::join!(
+            events::global_chat::message::message_delete(&ctx, Some(deleted_message_id).into_iter()),
+        );
+    }
+    async fn message_delete_bulk(&self, ctx: Context, _channel_id: ChannelId, multiple_deleted_messages_ids: Vec<MessageId>, _guild_id: Option<GuildId>) {
+        tokio::join!(
+            events::global_chat::message::message_delete(&ctx, multiple_deleted_messages_ids.iter().copied()),
         );
     }
     async fn channel_update(&self, ctx: Context, old: Option<GuildChannel>, new: GuildChannel) {
         tokio::join!(
-            events::global_chat::on_channel_update(&ctx, old.as_ref(), &new),
+            events::global_chat::channel::on_channel_update(&ctx, old.as_ref(), &new),
         );
     }
 }

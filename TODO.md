@@ -10,3 +10,6 @@
   - [ ] Message editing
   - [ ] Images / Attachments
   - [ ] Replies
+  - [ ] Reactions
+  - [ ] Embeds?
+  - [ ] Typing indicator
