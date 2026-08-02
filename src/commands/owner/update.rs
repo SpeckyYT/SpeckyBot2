@@ -11,7 +11,7 @@ crate::command! {
             (Status::Queued(false), "Fetch repository", &["git", "fetch", "--all"]),
             (Status::Queued(false), "Pull repository", &["git", "pull", "origin"]),
             (Status::Queued(true), "Compile", &["cargo", "build", "--release"]),
-            (Status::Queued(false), "Restart", &["pm2", "restart", "speckybot"]),
+            (Status::Queued(false), "Restart", &["pm2", "restart", "SpeckyBot"]),
         ];
 
         let mut bot_msg = msg.channel_id.say(&ctx.http, draw_statuses(&statuses, None)).await?;

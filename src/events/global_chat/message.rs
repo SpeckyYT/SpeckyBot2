@@ -70,12 +70,10 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
     }
 }
 
-pub async fn message_update(ctx: &Context, _old_if_available: Option<&Message>, new: Option<&Message>, event: &MessageUpdateEvent) {
+pub async fn message_update(ctx: &Context, _old_if_available: Option<&Message>, new: &Message, event: &MessageUpdateEvent) {
     if let Some(message) = gc_messages().get(&event.id) {
         if let GCMessageTree::Parent(children) = &message.tree {
-            if let Some(new) = new {
-                join_all(children.iter().map(|child| child.update_message(ctx, new))).await;
-            }
+            join_all(children.iter().map(|child| child.update_message(ctx, new))).await;
         }
     }
 }
