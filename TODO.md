@@ -10,7 +10,7 @@
   - [x] Message deleting
   - [ ] Role colors
   - [ ] Images / Attachments
-  - [ ] Replies
+  - [x] Replies
   - [ ] Reactions
   - [ ] Embeds?
   - [ ] Typing indicator

@@ -1,6 +1,6 @@
 use futures::future::join_all;
 use itertools::Itertools;
-use serenity::all::{Context, GuildChannel, Message, MessageId, MessageUpdateEvent};
+use serenity::all::{Context, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent};
 
 use crate::{env::GLOBAL_CHAT, events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
 
@@ -9,6 +9,20 @@ impl GCMessage {
         let Some(guild) = ctx.cache.guild(self.guild_id) else { return None };
         let Some(channel) = guild.channels.get(&self.channel_id) else { return None };
         Some(channel.clone())
+    }
+    pub fn get_family(&self) -> Option<(GCMessage, Vec<GCMessage>)> {
+        gc_messages()
+        .get(&self.message.id)
+        .and_then(|gcm| match &gcm.tree {
+            GCMessageTree::Parent(children) => Some((gcm.clone(), children.clone())),
+            GCMessageTree::Child(parent) =>
+                gc_messages()
+                .get(parent)
+                .and_then(|p| match &p.tree {
+                    GCMessageTree::Parent(children) => Some((p.clone(), children.clone())),
+                    GCMessageTree::Child(_) => None, // unreachable
+                })
+        })
     }
     pub async fn update_message(&self, ctx: &Context, msg: &Message) -> Option<()> {
         log_event("gc_update", format!("Message {} getting updated", msg.id));
@@ -37,10 +51,28 @@ pub async fn message(ctx: &Context, msg: &Message) {
     if gc_channels.contains(&msg.channel_id) {
         let gc_messages = gc_messages();
 
+        let reference_family = msg.referenced_message.as_ref()
+        .and_then(|referenced_message| gc_messages.get(&referenced_message.id))
+        .and_then(|reference| reference.get_family())
+        .map(|(parent, mut children)| {
+            children.push(parent);
+            children
+        });
+
         let messages = gc_channels.iter()
             .filter(|id| id.get() != msg.channel_id.get())
             .map(async |c| {
-                let gc_cm = global_chat_message(ctx, msg);
+                let mut gc_cm = global_chat_message(ctx, msg);
+
+                if let Some(reference_family) = &reference_family {
+                    if let Some(reference) = reference_family.iter().find(|gcm| gcm.channel_id.get() == c.get()) {
+                        let msg_reference = MessageReference::new(MessageReferenceKind::Default, *c)
+                            .message_id(reference.message.id)
+                            .fail_if_not_exists(false);
+                        gc_cm = gc_cm.reference_message(msg_reference);
+                    }
+                }
+
                 let Ok(m) = c.send_message(&ctx.http, gc_cm).await else { return None };
                 let gcm = GCMessage {
                     message: m.clone(),
