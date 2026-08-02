@@ -34,7 +34,7 @@ impl EventHandler for Bot {
 
         tokio::join!(
             events::commands::on_message(&ctx, &msg),
-            events::global_chat::message::on_message(&ctx, &msg),
+            events::global_chat::message::message(&ctx, &msg),
         );
     }
 

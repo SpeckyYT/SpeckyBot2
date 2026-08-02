@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 
 use dashmap::{DashMap, DashSet};
-use serenity::all::{ChannelId, GuildId, MessageId};
+use serenity::all::{ChannelId, GuildId, Message, MessageId};
 
 pub mod strings;
 pub mod message;
@@ -40,7 +40,7 @@ pub enum GCMessageTree {
 
 #[derive(Debug, Clone)]
 pub struct GCMessage {
-    pub message_id: MessageId,
+    pub message: Message,
     pub channel_id: ChannelId,
     pub guild_id: GuildId,
     pub tree: GCMessageTree,
