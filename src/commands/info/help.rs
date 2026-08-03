@@ -48,7 +48,7 @@ crate::command! {
                 // COMMAND FOUND
                 let mut command_info = format!(
                     "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {category}\n**Description:** {description}\n **Usage:** {usage}\n",
-                    &*PREFIX,
+                    *PREFIX,
                     names[0],
                 );
                 if names.len() > 1 {
@@ -60,7 +60,7 @@ crate::command! {
             Some(None) => {
                 // COMMAND NOT FOUND
                 embed.title("Invalid Command")
-                    .description(format!("Do `{}help` for the list of commands", &*PREFIX))
+                    .description(format!("Do `{}help` for the list of commands", *PREFIX))
             }
             None => {
                 // GENERAL HELP MESSAGE
@@ -85,8 +85,8 @@ crate::command! {
                 let table_string = format!("```\n{}\n```", String::from_utf8_lossy(&table_chars));
 
                 embed
-                    .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", &bot_user.name, &*PREFIX))
-                    .field("Instructions", format!("Simple! Just type `{}<category>` ||(without <> obviously)|| to get the available commands of the categories!", &*PREFIX), false)
+                    .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", bot_user.name, *PREFIX))
+                    .field("Instructions", format!("Simple! Just type `{}<category>` ||(without <> obviously)|| to get the available commands of the categories!", *PREFIX), false)
                     .field("Did you know that", &*DID_U_KNOW[rand::random_range(0..DID_U_KNOW.len())], false)
                     .footer(CreateEmbedFooter::new(format!("Based on SpeckyBot2 | Total Commands: {}", COMMANDS_MAP.len())).icon_url(bot_avatar_url(ctx)))
             }

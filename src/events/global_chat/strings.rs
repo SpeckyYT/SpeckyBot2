@@ -25,7 +25,7 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
         "Don't try to bypass any of the automatic filters/limitations.",
     ];
     
-    let admin_rules = vec![
+    let admin_rules = [
         "The next rules/informations are specifically for server admins/moderators.",
         "It's highly recommended to create a new/separate channel for the global-chat.",
         "The global-chat channel can't be tagged as NSFW.",
@@ -36,14 +36,14 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
         "SpeckyBot requires the following permissions: read/send messages/files/embeds and manage messages",
     ];
     
-    let reactions = vec![
+    let reactions = [
         "On some messages, you may get a reaction right after sending (the message gets ignored).".to_string(),
         format!("{}: Don't send two or more messages in a row", EMOTES.not_twice),
         format!("{}: Your message is too big", EMOTES.too_long),
         format!("{}: Your message contains external emotes", EMOTES.no_external),
     ];
     
-    let notes = vec![
+    let notes = [
         "Note:",
         "People may be young, have epilepsy, have heart problems or other psychophysical problems, so be sure to act accordingly.",
         "Every channel connected to the global-chat can read your messages.",
@@ -55,7 +55,7 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
         "Rules may be subject to changes at any time",
     ];
     
-    let tldr = vec![
+    let tldr = [
         "too long; didn't read.",
         "Don't be a dumbass.",
         "Don't share private/personal data.",
@@ -63,7 +63,7 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
         "Have fun.",
     ];
     
-    let format_rules = |rules: Vec<&str>| {
+    let format_rules = |rules: &[&str]| {
         rules
             .iter()
             .enumerate()
@@ -78,7 +78,7 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
             .join("\n")
     };
     
-    let format_notes = |notes: Vec<&str>| {
+    let format_notes = |notes: &[&str]| {
         notes
             .iter()
             .enumerate()
@@ -93,7 +93,7 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
             .join("\n")
     };
     
-    let format_tldr = |tldr: Vec<&str>| {
+    let format_tldr = |tldr: &[&str]| {
         tldr
             .iter()
             .enumerate()
@@ -115,10 +115,10 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
             "The Global Chat is a cross-server channel which allows you to make new friends, ask questions, talk about general stuff and much more!",
             "By including \"[GLOBAL]\" into a channel's topic, the channel will turn into a global-chat!"
         ))
-        .field("User Rules", format!("```md\n{}\n```", format_rules(user_rules)), false)
-        .field("Mods/Admins Rules/Informations", format!("```md\n{}\n```", format_rules(admin_rules)), false)
+        .field("User Rules", format!("```md\n{}\n```", format_rules(&user_rules)), false)
+        .field("Mods/Admins Rules/Informations", format!("```md\n{}\n```", format_rules(&admin_rules)), false)
         .field("Reactions", reactions.join("\n"), false)
-        .field("Notes", format!("```diff\n{}\n```", format_notes(notes)), false)
-        .field("TL;DR", format!("```md\n{}\n```", format_tldr(tldr)), false)
+        .field("Notes", format!("```diff\n{}\n```", format_notes(&notes)), false)
+        .field("TL;DR", format!("```md\n{}\n```", format_tldr(&tldr)), false)
         .footer(CreateEmbedFooter::new(format!("{} Global Chats Connected", global_chats_count)))
 }

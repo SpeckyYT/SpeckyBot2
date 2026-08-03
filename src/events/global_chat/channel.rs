@@ -14,12 +14,9 @@ pub async fn on_channel_update(ctx: &Context, old: Option<&GuildChannel>, new: &
     };
 
     if let Some(old) = old {
-        match (old.topic.as_ref().and_then(|t| check_gc_topic(&t)), new.topic.as_ref().and_then(|t| check_gc_topic(&t))) {
+        match (old.topic.as_ref().and_then(|t| check_gc_topic(t)), new.topic.as_ref().and_then(|t| check_gc_topic(t))) {
             (None, Some(_gc)) => announce_and_add().await,
-            (Some(old_gc), Some(new_gc)) =>
-                if old_gc != new_gc {
-                    announce_and_add().await
-                }
+            (Some(old_gc), Some(new_gc)) if old_gc != new_gc => announce_and_add().await,
             _ => {}
         }
     }
@@ -34,13 +31,10 @@ pub async fn update_globalchat_channels(ctx: &Context, guilds: impl Iterator<Ite
     for guild in guilds {
         if let Ok(channels) = guild.channels(&ctx.http).await {
             for (_, channel) in channels {
-                if let Some(topic) = channel.topic {
-                    if let Some(global_chat) = check_gc_topic(&topic) {
-                        if channel.nsfw == global_chat.nsfw {
-                            set.insert(channel.id); // TODO: multiple globalchats?
-                        }
-                    }
-                }
+                channel.topic
+                .and_then(|topic| check_gc_topic(&topic))
+                .filter(|gc| channel.nsfw == gc.nsfw)
+                .inspect(|_| { set.insert(channel.id); });
             }
         }
     }

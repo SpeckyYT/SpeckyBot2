@@ -27,7 +27,7 @@ const GLOBAL_CHATS: &[GloablChat] = &[
 pub static GLOBAL_CHAT_CHANNELS: OnceLock<DashSet<ChannelId>> = OnceLock::new();
 #[inline]
 fn gc_channels() -> &'static DashSet<ChannelId> {
-    GLOBAL_CHAT_CHANNELS.get_or_init(|| DashSet::new())
+    GLOBAL_CHAT_CHANNELS.get_or_init(DashSet::new)
 }
 
 #[derive(Debug, Clone)]
@@ -49,7 +49,7 @@ pub struct GCMessage {
 pub static GLOBAL_CHAT_MESSAGES: OnceLock<DashMap<MessageId, GCMessage>> = OnceLock::new();
 #[inline]
 fn gc_messages() -> &'static DashMap<MessageId, GCMessage> {
-    GLOBAL_CHAT_MESSAGES.get_or_init(|| DashMap::new())
+    GLOBAL_CHAT_MESSAGES.get_or_init(DashMap::new)
 }
 
 pub fn check_gc_topic(topic: &str) -> Option<&'static GloablChat> {

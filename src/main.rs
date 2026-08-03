@@ -50,10 +50,8 @@ impl EventHandler for Bot {
             },
         };
         let author = old.as_ref().or(Some(&new)).map(|m| &m.author).or(event.author.as_ref());
+        if let Some(author) = author && author.bot { return }
 
-        if let Some(author) = author {
-            if author.bot { return }
-        }
         log_event("message_update", format!("Message {} updated in channel {} (author: {})", event.id, event.channel_id, author.map(|a| a.name.clone()).unwrap_or("<unknown>".into())));
 
         tokio::join!(

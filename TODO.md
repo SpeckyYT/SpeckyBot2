@@ -12,5 +12,5 @@
   - [ ] Images / Attachments
   - [x] Replies
   - [ ] Reactions
-  - [ ] Embeds?
+  - [x] Embeds?
   - [ ] Typing indicator

@@ -118,7 +118,7 @@ pub fn check_category_command(category: &str) -> Option<String> {
         .map(|metadatas| {
             #[allow(unstable_name_collisions)]
             let commands: String = metadatas.iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
-            format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", &*PREFIX, uppercase_first_char(category))
+            format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, uppercase_first_char(category))
         })
 }
 

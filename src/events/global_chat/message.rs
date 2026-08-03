@@ -6,8 +6,8 @@ use crate::{env::GLOBAL_CHAT, events::global_chat::{GCMessage, GCMessageTree, gc
 
 impl GCMessage {
     pub fn get_channel(&self, ctx: &Context) -> Option<GuildChannel> {
-        let Some(guild) = ctx.cache.guild(self.guild_id) else { return None };
-        let Some(channel) = guild.channels.get(&self.channel_id) else { return None };
+        let guild = ctx.cache.guild(self.guild_id)?;
+        let channel = guild.channels.get(&self.channel_id)?;
         Some(channel.clone())
     }
     pub fn get_family(&self) -> Option<(GCMessage, Vec<GCMessage>)> {
@@ -33,9 +33,7 @@ impl GCMessage {
                 log_event("gc_update", format!("Message {} (parent {}) optained", message_to_edit.id, msg.id));
                 message_to_edit.edit(&ctx.http, global_chat_edit_message(ctx, msg)).await.ok()
             }
-            GCMessageTree::Parent(_) => {
-                return None;
-            }
+            GCMessageTree::Parent(_) => None,
         }
     }
     pub async fn delete_message(&self, ctx: &Context) -> Option<()> {
@@ -64,13 +62,15 @@ pub async fn message(ctx: &Context, msg: &Message) {
             .map(async |c| {
                 let mut gc_cm = global_chat_message(ctx, msg);
 
-                if let Some(reference_family) = &reference_family {
-                    if let Some(reference) = reference_family.iter().find(|gcm| gcm.channel_id.get() == c.get()) {
-                        let msg_reference = MessageReference::new(MessageReferenceKind::Default, *c)
-                            .message_id(reference.message.id)
-                            .fail_if_not_exists(false);
-                        gc_cm = gc_cm.reference_message(msg_reference);
-                    }
+                let reference = reference_family
+                    .as_ref()
+                    .and_then(|reference_family| reference_family.iter().find(|gcm| gcm.channel_id.get() == c.get()));
+
+                if let Some(reference) = reference  {
+                    let msg_reference = MessageReference::new(MessageReferenceKind::Default, *c)
+                        .message_id(reference.message.id)
+                        .fail_if_not_exists(false);
+                    gc_cm = gc_cm.reference_message(msg_reference);
                 }
 
                 let Ok(m) = c.send_message(&ctx.http, gc_cm).await else { return None };

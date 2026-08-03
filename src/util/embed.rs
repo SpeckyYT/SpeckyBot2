@@ -43,12 +43,12 @@ pub fn global_chat_message(ctx: &Context, msg: &Message) -> CreateMessage {
 pub fn global_chat_embeds(ctx: &Context, msg: &Message) -> Vec<CreateEmbed> {
     let mut embeds = Vec::with_capacity(msg.embeds.len() + 1);
     embeds.push(global_chat_embed(ctx, msg));
-    embeds.extend(msg.embeds.iter().map(|e| embed_to_create_embed(e)));
+    embeds.extend(msg.embeds.iter().map(embed_to_create_embed));
     embeds
 }
 
 pub fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
-    let guild = ctx.cache().expect("Always valid").guild(msg.guild_id.unwrap_or(Default::default()));
+    let guild = ctx.cache().expect("Always valid").guild(msg.guild_id.unwrap_or_default());
 
     let mut embed = CreateEmbed::new()
     .author(CreateEmbedAuthor::new(msg.author.display_name()).icon_url(user_avatar_url(&msg.author)).url(msg.link()))
@@ -58,10 +58,9 @@ pub fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
     if let Some(guild) = guild {
         embed = embed.footer(CreateEmbedFooter::new(&guild.name).icon_url(guild.icon_url().unwrap_or_default()));
 
-        if let Some(member) = guild.members.get(&msg.author.id) {
-            if let Some(color) = member.colour(&ctx.cache) {
-                embed = embed.color(color);
-            }
+        let color = guild.members.get(&msg.author.id).and_then(|member| member.colour(&ctx.cache));
+        if let Some(color) = color {
+            embed = embed.color(color);
         }
     }
 
