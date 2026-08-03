@@ -1,6 +1,6 @@
 use futures::future::join_all;
 use itertools::Itertools;
-use serenity::all::{Context, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent};
+use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent};
 
 use crate::{env::GLOBAL_CHAT, events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
 
@@ -57,6 +57,9 @@ pub async fn message(ctx: &Context, msg: &Message) {
             children
         });
 
+        let attachments = join_all(msg.attachments.iter().map(|attachment| CreateAttachment::url(&ctx.http, &attachment.url))).await;
+        let attachments = attachments.iter().flatten();
+
         let messages = gc_channels.iter()
             .filter(|id| id.get() != msg.channel_id.get())
             .map(async |c| {
@@ -72,6 +75,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
                         .fail_if_not_exists(false);
                     gc_cm = gc_cm.reference_message(msg_reference);
                 }
+
+                gc_cm = gc_cm.add_files(attachments.clone().cloned());
 
                 let Ok(m) = c.send_message(&ctx.http, gc_cm).await else { return None };
                 let gcm = GCMessage {

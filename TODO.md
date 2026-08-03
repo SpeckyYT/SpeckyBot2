@@ -9,7 +9,7 @@
   - [x] Message editing
   - [x] Message deleting
   - [ ] Role colors
-  - [ ] Images / Attachments
+  - [x] Images / Attachments
   - [x] Replies
   - [ ] Reactions
   - [x] Embeds?
