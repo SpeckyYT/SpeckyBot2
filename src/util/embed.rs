@@ -1,5 +1,5 @@
 use hextool::Convert;
-use serenity::all::{CacheHttp, Color, Context, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, CreateMessage, EditMessage, Embed, Message, Timestamp};
+use serenity::all::{Color, Context, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, CreateMessage, EditMessage, Embed, Message, Timestamp};
 
 use crate::{env::COLOR, util::bot_user::user_avatar_url};
 
@@ -32,35 +32,39 @@ pub fn error_embed() -> CreateEmbed {
     .color(Color::from_rgb(255, 0, 0))
 }
 
-pub fn global_chat_edit_message(ctx: &Context, msg: &Message) -> EditMessage {
-    EditMessage::new().embeds(global_chat_embeds(ctx, msg))
+pub async fn global_chat_edit_message(ctx: &Context, msg: &Message) -> EditMessage {
+    EditMessage::new().embeds(global_chat_embeds(ctx, msg).await)
 }
 
-pub fn global_chat_message(ctx: &Context, msg: &Message) -> CreateMessage {
-    CreateMessage::new().embeds(global_chat_embeds(ctx, msg))
+pub async fn global_chat_message(ctx: &Context, msg: &Message) -> CreateMessage {
+    CreateMessage::new().embeds(global_chat_embeds(ctx, msg).await)
 }
 
-pub fn global_chat_embeds(ctx: &Context, msg: &Message) -> Vec<CreateEmbed> {
+pub async fn global_chat_embeds(ctx: &Context, msg: &Message) -> Vec<CreateEmbed> {
     let mut embeds = Vec::with_capacity(msg.embeds.len() + 1);
-    embeds.push(global_chat_embed(ctx, msg));
+    embeds.push(global_chat_embed(ctx, msg).await);
     embeds.extend(msg.embeds.iter().map(embed_to_create_embed));
     embeds
 }
 
-pub fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
-    let guild = ctx.cache().expect("Always valid").guild(msg.guild_id.unwrap_or_default());
-
+pub async fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
     let mut embed = CreateEmbed::new()
     .author(CreateEmbedAuthor::new(msg.author.display_name()).icon_url(user_avatar_url(&msg.author)).url(msg.link()))
     .description(&msg.content)
     .timestamp(msg.timestamp);
 
-    if let Some(guild) = guild {
-        embed = embed.footer(CreateEmbedFooter::new(&guild.name).icon_url(guild.icon_url().unwrap_or_default()));
+    if let Some(guild_id) = msg.guild_id {
+        if let Some(guild) = ctx.cache.guild(guild_id) {
+            let guild_name = guild.name.clone();
+            let guild_icon = guild.icon_url().unwrap_or_default();
 
-        let color = guild.members.get(&msg.author.id).and_then(|member| member.colour(&ctx.cache));
-        if let Some(color) = color {
-            embed = embed.color(color);
+            embed = embed.footer(CreateEmbedFooter::new(&guild_name).icon_url(guild_icon));
+        }
+
+        if let Ok(member) = guild_id.member(&ctx.http, msg.author.id).await {
+            if let Some(color) = member.colour(&ctx.cache) {
+                embed = embed.color(color);
+            }
         }
     }
 

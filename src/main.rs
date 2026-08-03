@@ -29,8 +29,8 @@ impl EventHandler for Bot {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
-        log_event("message", format!("Message {} in channel {} by {}", msg.id, msg.channel_id, msg.author.name));
         if msg.author.bot { return }
+        log_event("message", format!("Message {} in channel {} by {}", msg.id, msg.channel_id, msg.author.name));
 
         tokio::join!(
             events::commands::on_message(&ctx, &msg),

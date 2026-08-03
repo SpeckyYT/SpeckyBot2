@@ -31,7 +31,7 @@ impl GCMessage {
                 log_event("gc_update", format!("Message {} is a child", msg.id));
                 let mut message_to_edit = self.message.clone();
                 log_event("gc_update", format!("Message {} (parent {}) optained", message_to_edit.id, msg.id));
-                message_to_edit.edit(&ctx.http, global_chat_edit_message(ctx, msg)).await.ok()
+                message_to_edit.edit(&ctx.http, global_chat_edit_message(ctx, msg).await).await.ok()
             }
             GCMessageTree::Parent(_) => None,
         }
@@ -63,7 +63,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
         let messages = gc_channels.iter()
             .filter(|id| id.get() != msg.channel_id.get())
             .map(async |c| {
-                let mut gc_cm = global_chat_message(ctx, msg);
+                let mut gc_cm = global_chat_message(ctx, msg).await;
 
                 let reference = reference_family
                     .as_ref()

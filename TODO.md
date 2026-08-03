@@ -8,7 +8,7 @@
 - [ ] globalchat
   - [x] Message editing
   - [x] Message deleting
-  - [ ] Role colors
+  - [x] Role colors
   - [x] Images / Attachments
   - [x] Replies
   - [ ] Reactions
