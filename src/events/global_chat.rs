@@ -1,6 +1,7 @@
 use std::sync::OnceLock;
 
 use dashmap::{DashMap, DashSet};
+use futures::lock::Mutex;
 use serenity::all::{ChannelId, GuildId, Message, MessageId};
 
 pub mod strings;
@@ -24,6 +25,8 @@ const GLOBAL_CHATS: &[GloablChat] = &[
     //     nsfw: true,
     // },
 ];
+
+pub static EDIT_LOCK: Mutex<()> = Mutex::new(()); // TODO: find a better solution
 
 pub static GLOBAL_CHAT_CHANNELS: OnceLock<DashSet<ChannelId>> = OnceLock::new();
 #[inline]

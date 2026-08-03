@@ -2,7 +2,7 @@ use futures::future::join_all;
 use itertools::Itertools;
 use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent};
 
-use crate::{env::GLOBAL_CHAT, events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
+use crate::{env::GLOBAL_CHAT, events::global_chat::{EDIT_LOCK, GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
 
 impl GCMessage {
     pub fn get_channel(&self, ctx: &Context) -> Option<GuildChannel> {
@@ -47,6 +47,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
     let gc_channels = gc_channels();
     
     if gc_channels.contains(&msg.channel_id) {
+        let edit_lock = EDIT_LOCK.lock();
+
         let gc_messages = gc_messages();
 
         let reference_family = msg.referenced_message.as_ref()
@@ -100,6 +102,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
             guild_id: msg.guild_id.unwrap_or_default(),
             tree: GCMessageTree::Parent(children),
         });
+
+        drop(edit_lock);
     }
 }
 
@@ -107,8 +111,10 @@ pub async fn message_update(ctx: &Context, _old_if_available: Option<&Message>, 
     if let Some(message) = gc_messages().get(&event.id) {
         log_event("gc_update", format!("Obtained GC Message {}", message.message.id));
         if let GCMessageTree::Parent(children) = &message.tree {
+            let edit_lock = EDIT_LOCK.lock();
             let update_status = join_all(children.iter().map(|child| child.update_message(ctx, new))).await;
             log_event("gc_update", format!("Update statuses on message {} ({:?})", message.message.id, update_status));
+            drop(edit_lock);
         }
     }
 }

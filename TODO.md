@@ -14,3 +14,4 @@
   - [ ] Reactions
   - [x] Embeds?
   - [x] Typing indicator
+  - [ ] Database
