@@ -6,6 +6,7 @@ use serenity::all::{ChannelId, GuildId, Message, MessageId};
 pub mod strings;
 pub mod message;
 pub mod channel;
+pub mod typing;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GloablChat {

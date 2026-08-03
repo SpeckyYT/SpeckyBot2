@@ -13,4 +13,4 @@
   - [x] Replies
   - [ ] Reactions
   - [x] Embeds?
-  - [ ] Typing indicator
+  - [x] Typing indicator

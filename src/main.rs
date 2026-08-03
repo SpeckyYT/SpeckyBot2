@@ -1,4 +1,4 @@
-use serenity::all::{ChannelId, GuildChannel, GuildId, MessageId, MessageUpdateEvent};
+use serenity::all::{ChannelId, GuildChannel, GuildId, MessageId, MessageUpdateEvent, TypingStartEvent};
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
@@ -82,6 +82,16 @@ impl EventHandler for Bot {
             events::global_chat::channel::on_channel_update(&ctx, old.as_ref(), &new),
         );
     }
+
+    async fn typing_start(&self, ctx: Context, event: TypingStartEvent) {
+        if let Ok(user) = event.user_id.to_user(&ctx.http).await && user.bot {
+            return
+        }
+
+        tokio::join!(
+            events::global_chat::typing::typing_start(&ctx, &event),
+        );
+    }
 }
 
 #[tokio::main]
@@ -93,7 +103,10 @@ async fn main() {
     let bot = Bot::default();
 
     // Set gateway intents, which decides what events the bot will be notified about
-    let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT | GatewayIntents::GUILDS;
+    let intents = GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT
+        | GatewayIntents::GUILDS
+        | GatewayIntents::GUILD_MESSAGE_TYPING;
 
     let mut client = Client::builder(&*env::TOKEN, intents)
         .event_handler(bot)
