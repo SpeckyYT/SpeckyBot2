@@ -1,8 +1,8 @@
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
+use crate::{commands::{self, OWNER_CATEGORY, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
 
-const ONWER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
+pub const ONWER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
 // const NSFW_ERROR: &str      =  "🔞 This command is only allowed in NSFW channels.";
 // const USER_PERM_ERROR: &str =  "🚷 You don't have the required permissions for that command.";
@@ -26,7 +26,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
 
     match metadata_and_run {
         Some((metadata, run)) => {
-            if metadata.category == "owner" && !is_owner(msg.author.id.to_string().as_str()) {
+            if metadata.category == OWNER_CATEGORY && !is_owner(msg.author.id.to_string().as_str()) {
                 // TODO: "illegal" feature
                 let _ = msg.channel_id.send_message(
                     &ctx.http,

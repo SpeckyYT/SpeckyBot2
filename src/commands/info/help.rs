@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata}, env::is_owner, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::is_owner, events::commands::ONWER_ERROR, util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 macro_rules! holy_cow {
     ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {
@@ -40,12 +40,14 @@ holy_cow![
 ];
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
-    category: "info",
+    category: IMPORTANT_CATEGORY,
     run: |ctx, msg, data| {
         let embed = default_embed(Some(ctx));
         let embed = match data.args.first().map(|cmd| commands::get_command(&cmd.to_lowercase())) {
+            // OWNER COMMAND AND IS NOT OWNER
+            Some(Some((cmd,_))) if cmd.category == OWNER_CATEGORY && !is_owner(msg.author.id.to_string()) => embed.description(ONWER_ERROR),
+            // COMMAND FOUND
             Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
-                // COMMAND FOUND
                 let mut command_info = format!(
                     "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {category}\n**Description:** {description}\n **Usage:** {usage}\n",
                     *PREFIX,
@@ -54,21 +56,20 @@ crate::command! {
                 if names.len() > 1 {
                     command_info.push_str(&format!("**Aliases:** {}", names.join(", ")));
                 }
-
                 embed.description(command_info)
             }
+            // COMMAND NOT FOUND
             Some(None) => {
-                // COMMAND NOT FOUND
                 embed.title("Invalid Command")
                     .description(format!("Do `{}help` for the list of commands", *PREFIX))
             }
+            // GENERAL HELP MESSAGE
             None => {
-                // GENERAL HELP MESSAGE
                 let bot_user = ctx.cache.current_user();
 
                 let filtered_categories = CATEGORIES.iter()
                 .filter(|&c| match *c.0 {
-                    "owner" => is_owner(&msg.author.id.to_string()),
+                    OWNER_CATEGORY => is_owner(&msg.author.id.to_string()),
                     _ => true
                 });
 

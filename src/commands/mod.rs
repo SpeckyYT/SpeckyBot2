@@ -19,6 +19,9 @@ pub const DEFAULT_CATEGORY: &str = "uncategorized";
 pub const DEFUALT_DESCRIPTION: &str = "No description provided";
 pub const DEFUALT_USAGE: &str = "No usage provided";
 
+pub const IMPORTANT_CATEGORY: &str = "important";
+pub const OWNER_CATEGORY: &str = "owner";
+
 #[derive(Debug, Clone, Copy)]
 pub struct CommandMetadata {
     pub names: &'static [&'static str],
@@ -41,7 +44,7 @@ macro_rules! command {
         names: $names:tt,
         $(description: $desc:literal,)?
         $(usage: $usage:literal,)?
-        $(category: $cat:literal,)?
+        $(category: $cat:expr,)?
         run: |$ctx:ident, $msg:ident, $content:ident| $body:block
         $(,)*
     ) => {

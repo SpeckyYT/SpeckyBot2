@@ -12,6 +12,6 @@ lazy_static! {
     pub static ref GLOBAL_CHAT: bool = std::env::var("GLOBAL_CHAT").unwrap_or_default().contains("true");
 }
 
-pub fn is_owner(id: &str) -> bool {
-    OWNERS.contains(&id)
+pub fn is_owner(id: impl AsRef<str>) -> bool {
+    OWNERS.contains(&id.as_ref())
 }
