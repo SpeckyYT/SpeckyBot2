@@ -28,16 +28,13 @@ impl EventHandler for Bot {
     }
 
     async fn message_update(&self, ctx: Context, old: Option<Message>, new: Option<Message>, event: MessageUpdateEvent) {
-        let new = match new {
+        let mut new = match new {
             Some(new) => new,
-            None => {
-                if let Ok(new) = event.channel_id.message(&ctx.http, event.id).await {
-                    new
-                } else {
-                    return
-                }
-            },
+            None if let Ok(new) = event.channel_id.message(&ctx.http, event.id).await => new,
+            None => return,
         };
+        event.apply_to_message(&mut new);
+
         let author = old.as_ref().or(Some(&new)).map(|m| &m.author).or(event.author.as_ref());
         if let Some(author) = author && author.bot { return }
 
