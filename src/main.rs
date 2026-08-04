@@ -1,4 +1,4 @@
-use serenity::all::{ChannelId, GuildChannel, GuildId, MessageId, MessageUpdateEvent, TypingStartEvent};
+use serenity::all::{ChannelId, GuildChannel, GuildId, MessageId, MessageUpdateEvent, Reaction, TypingStartEvent};
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
@@ -83,6 +83,18 @@ impl EventHandler for Bot {
         );
     }
 
+    async fn reaction_add(&self, ctx: Context, add_reaction: Reaction) {        
+        if let Ok(user) = add_reaction.user(&ctx.http).await && user.bot {
+            return
+        }
+        
+        log_event("reaction_add", add_reaction.emoji.to_string());
+
+        tokio::join!(
+            events::global_chat::reaction::reaction_add(&ctx, &add_reaction),
+        );
+    }
+
     async fn typing_start(&self, ctx: Context, event: TypingStartEvent) {
         if let Ok(user) = event.user_id.to_user(&ctx.http).await && user.bot {
             return
@@ -106,7 +118,8 @@ async fn main() {
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT
         | GatewayIntents::GUILDS
-        | GatewayIntents::GUILD_MESSAGE_TYPING;
+        | GatewayIntents::GUILD_MESSAGE_TYPING
+        | GatewayIntents::GUILD_MESSAGE_REACTIONS;
 
     let mut client = Client::builder(&*env::TOKEN, intents)
         .event_handler(bot)

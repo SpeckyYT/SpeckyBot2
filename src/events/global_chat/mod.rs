@@ -8,6 +8,7 @@ pub mod strings;
 pub mod message;
 pub mod channel;
 pub mod typing;
+pub mod reaction;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GloablChat {

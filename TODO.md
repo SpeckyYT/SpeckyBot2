@@ -11,7 +11,8 @@
   - [x] Role colors
   - [x] Images / Attachments
   - [x] Replies
-  - [ ] Reactions
+  - [x] Reactions
+    - [ ] Remove reactions if people unreacted?
   - [x] Embeds?
   - [x] Typing indicator
   - [ ] Database

@@ -15,7 +15,7 @@ const EMOTES: Emotes = Emotes {
 };
 
 pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
-    let user_rules = vec![
+    let user_rules = [
         "Be sure to follow the following rules!",
         "No NSFW/NSFL or similars. Don't send anything related to +18/illegal/disturbing/unsettling content.",
         "Don't spam. This includes sending earrape videos, sending messages with little to no content, sending huge messages, sending too many attachments and disturbing ongoing discussions.",

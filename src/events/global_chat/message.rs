@@ -11,10 +11,8 @@ impl GCMessage {
         Some(channel.clone())
     }
     pub fn get_family(&self) -> Option<(GCMessage, Vec<GCMessage>)> {
-        gc_messages()
-        .get(&self.message.id)
-        .and_then(|gcm| match &gcm.tree {
-            GCMessageTree::Parent(children) => Some((gcm.clone(), children.clone())),
+        match &self.tree {
+            GCMessageTree::Parent(children) => Some((self.clone(), children.clone())),
             GCMessageTree::Child(parent) =>
                 gc_messages()
                 .get(parent)
@@ -22,6 +20,13 @@ impl GCMessage {
                     GCMessageTree::Parent(children) => Some((p.clone(), children.clone())),
                     GCMessageTree::Child(_) => None, // unreachable
                 })
+        }
+    }
+    pub fn get_flat_family(&self) -> Option<Vec<GCMessage>> {
+        self.get_family()
+        .map(|(parent, mut children)| {
+            children.push(parent);
+            children
         })
     }
     pub async fn update_message(&self, ctx: &Context, msg: &Message) -> Option<()> {
@@ -53,11 +58,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
 
         let reference_family = msg.referenced_message.as_ref()
         .and_then(|referenced_message| gc_messages.get(&referenced_message.id))
-        .and_then(|reference| reference.get_family())
-        .map(|(parent, mut children)| {
-            children.push(parent);
-            children
-        });
+        .and_then(|reference| reference.get_flat_family());
 
         let attachments = join_all(msg.attachments.iter().map(|attachment| CreateAttachment::url(&ctx.http, &attachment.url))).await;
         let attachments = attachments.iter().flatten();

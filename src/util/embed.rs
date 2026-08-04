@@ -61,10 +61,8 @@ pub async fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
             embed = embed.footer(CreateEmbedFooter::new(&guild_name).icon_url(guild_icon));
         }
 
-        if let Ok(member) = guild_id.member(&ctx.http, msg.author.id).await {
-            if let Some(color) = member.colour(&ctx.cache) {
-                embed = embed.color(color);
-            }
+        if let Some(color) = guild_id.member(&ctx.http, msg.author.id).await.ok().and_then(|m| m.colour(&ctx.cache)) {
+            embed = embed.color(color);
         }
     }
 
