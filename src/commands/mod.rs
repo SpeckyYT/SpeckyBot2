@@ -20,6 +20,7 @@ pub const DEFUALT_DESCRIPTION: &str = "No description provided";
 pub const DEFUALT_USAGE: &str = "No usage provided";
 
 pub const IMPORTANT_CATEGORY: &str = "important";
+pub const MATH_CATEGORY: &str = "math";
 pub const OWNER_CATEGORY: &str = "owner";
 
 #[derive(Debug, Clone, Copy)]
@@ -127,6 +128,7 @@ pub fn check_category_command(category: &str) -> Option<String> {
 
 commands![
     update: "owner/update.rs",
+    collatz: "math/collatz.rs",
     donate: "important/donate.rs",
     help: "important/help.rs",
     invite: "important/invite.rs",
