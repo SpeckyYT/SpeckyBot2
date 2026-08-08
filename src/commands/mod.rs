@@ -2,7 +2,7 @@ use ahash::AHashMap;
 use itertools::Itertools;
 use std::{collections::BTreeMap, pin::Pin};
 
-use crate::{env::PREFIX, util::string::uppercase_first_char};
+use crate::{env::PREFIX, output_file, util::string::uppercase_first_char};
 
 pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
 pub type RunFunction = Box<
@@ -126,11 +126,4 @@ pub fn check_category_command(category: &str) -> Option<String> {
         })
 }
 
-commands![
-    update: "owner/update.rs",
-    collatz: "math/collatz.rs",
-    donate: "important/donate.rs",
-    help: "important/help.rs",
-    invite: "important/invite.rs",
-    ping: "important/ping.rs",
-];
+include!(concat!(env!("OUT_DIR"), "/", output_file!()));
