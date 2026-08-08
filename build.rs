@@ -43,6 +43,10 @@ pub fn collect_rs_files_recursive(
             }
         } else if path.extension().and_then(|s| s.to_str()) == Some("rs") {
             // Get relative path from base_dir
+            if let Ok(string) = fs::read_to_string(&path) && string.starts_with("#[ignore]") {
+                continue
+            }
+
             if let Ok(relative_path) = path.strip_prefix(base_dir) {
                 let rel_path_str = relative_path.to_string_lossy().to_string();
                 

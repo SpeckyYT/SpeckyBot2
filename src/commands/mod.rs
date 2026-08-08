@@ -22,6 +22,7 @@ pub const DEFUALT_USAGE: &str = "No usage provided";
 pub const IMPORTANT_CATEGORY: &str = "important";
 pub const MATH_CATEGORY: &str = "math";
 pub const OWNER_CATEGORY: &str = "owner";
+pub const GAMES_CATEGORY: &str = "games";
 
 #[derive(Debug, Clone, Copy)]
 pub struct CommandMetadata {
@@ -57,8 +58,11 @@ macro_rules! command {
         };
         
         pub async fn run(
+            #[allow(unused)]
             $ctx: &serenity::client::Context,
+            #[allow(unused)]
             $msg: &serenity::model::channel::Message,
+            #[allow(unused)]
             $content: $crate::ParsedCommandData,
         ) -> anyhow::Result<()> $body
 
