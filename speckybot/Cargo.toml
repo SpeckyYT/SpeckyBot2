@@ -18,3 +18,5 @@ rand = { workspace = true }
 serenity = { version = "0.12.5", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "chrono", "cache"] }
 tokio = { version = "1.53.0", features = ["full"] }
 tracing = { workspace = true }
+
+speckycards = { path = "../speckycards" }
