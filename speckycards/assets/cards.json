@@ -1,0 +1,24 @@
+{
+	"cards": [
+		{
+			"id": 51,
+			"rarity": 0,
+            "Text": "Specky is gay"
+		},
+		{
+			"id": 52,
+			"rarity": 1,
+			"Text": "Specky is NOT gay"
+		},
+		{
+			"id": 53,
+			"rarity": 1,
+			"Text": "Specky is maybe gay"
+		},
+		{
+			"id": 54,
+			"rarity": 2,
+            "Text": "Specky is CERTAINLY gay"
+		}
+	]
+}
