@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fs;
 use std::path::PathBuf;
 use std::env;
@@ -65,16 +66,25 @@ pub fn collect_rs_files_recursive(
     Ok(())
 }
 
-pub fn sanitize_ident(s: &str) -> String {
-    s.chars()
-        .map(|c| {
-            if c.is_alphanumeric() || c == '_' {
-                c
-            } else {
-                '_'
+pub fn sanitize_ident(s: &str) -> Cow<'_, str> {
+    let out = s.char_indices().fold(None, |acc, (i, c)| {
+        let ok = c.is_ascii_alphanumeric() || c == '_';
+        match acc {
+            None if ok => None,
+            None => {
+                let mut buf = String::with_capacity(s.len());
+                buf.push_str(&s[..i]);
+                buf.push('_');
+                Some(buf)
             }
-        })
-        .collect()
+            Some(mut buf) if ok => { buf.push(c); Some(buf) }
+            Some(mut buf) => { buf.push('_'); Some(buf) }
+        }
+    });
+    match out {
+        None => Cow::Borrowed(s),
+        Some(buf) => Cow::Owned(buf),
+    }
 }
 
 pub fn generate_module_declarations(files: &[(String, String)]) -> String {
