@@ -44,6 +44,10 @@ impl GCMessage {
     pub async fn delete_message(&self, ctx: &Context) -> Option<()> {
         self.message.delete(&ctx.http).await.ok()
     }
+    pub async fn delete_message_family(&self, ctx: &Context) -> Option<Vec<Result<(), serenity::Error>>> {
+        let messages = join_all(self.get_flat_family()?.iter().map(|gcm| gcm.message.delete(&ctx.http))).await;
+        Some(messages)
+    }
 }
 
 pub async fn message(ctx: &Context, msg: &Message) {

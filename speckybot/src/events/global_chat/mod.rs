@@ -31,7 +31,7 @@ pub static EDIT_LOCK: Mutex<()> = Mutex::new(()); // TODO: find a better solutio
 
 pub static GLOBAL_CHAT_CHANNELS: OnceLock<DashSet<ChannelId>> = OnceLock::new();
 #[inline]
-fn gc_channels() -> &'static DashSet<ChannelId> {
+pub fn gc_channels() -> &'static DashSet<ChannelId> {
     GLOBAL_CHAT_CHANNELS.get_or_init(DashSet::new)
 }
 
@@ -53,7 +53,7 @@ pub struct GCMessage {
 
 pub static GLOBAL_CHAT_MESSAGES: OnceLock<DashMap<MessageId, GCMessage>> = OnceLock::new();
 #[inline]
-fn gc_messages() -> &'static DashMap<MessageId, GCMessage> {
+pub fn gc_messages() -> &'static DashMap<MessageId, GCMessage> {
     GLOBAL_CHAT_MESSAGES.get_or_init(DashMap::new)
 }
 
