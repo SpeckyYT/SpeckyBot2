@@ -4,7 +4,7 @@ use serenity::all::{Color, CreateMessage, MessageId};
 use crate::{commands::OWNER_CATEGORY, events::global_chat::gc_messages, util::embed::default_embed};
 
 crate::command! {
-    names: "update",
+    names: ["gcdelete","gcd"],
     category: OWNER_CATEGORY,
     run: |ctx, msg, data| {
         let gc_messages = gc_messages();
