@@ -1,6 +1,5 @@
-use ahash::AHashMap;
 use itertools::Itertools;
-use std::{collections::BTreeMap, pin::Pin};
+use std::pin::Pin;
 
 use crate::{env::PREFIX, output_file, util::string::uppercase_first_char};
 
@@ -63,7 +62,7 @@ macro_rules! command {
             #[allow(unused)]
             $msg: &serenity::model::channel::Message,
             #[allow(unused)]
-            $content: $crate::ParsedCommandData,
+            $content: $crate::commands::ParsedCommandData,
         ) -> anyhow::Result<()> $body
 
         // // Poise slash command version
@@ -85,12 +84,16 @@ macro_rules! command {
     (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
 }
 
+#[allow(unused)]
 macro_rules! commands {
     ($($name:ident $(: $str:literal)?),* $(,)?) => {
         $(
             $(#[path = $str])?
             mod $name;
         )*
+
+        use ahash::AHashMap;
+        use std::collections::BTreeMap;
 
         lazy_static::lazy_static! {
             pub static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];

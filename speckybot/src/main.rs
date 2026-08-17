@@ -1,8 +1,5 @@
 use serenity::prelude::*;
 
-use crate::commands::ParsedCommandData;
-use crate::env::PREFIX;
-
 #[path="../build.rs"]
 pub mod build;
 

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{PREFIX, commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::is_owner, events::commands::ONWER_ERROR, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::{PREFIX, is_owner}, events::commands::ONWER_ERROR, util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 macro_rules! holy_cow {
     ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {

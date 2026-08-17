@@ -1723,8 +1723,10 @@ dependencies = [
  "ilog",
  "itertools",
  "lazy_static",
+ "proc-macro2",
  "rand 0.10.2",
  "serenity",
+ "syn 3.0.3",
  "tokio",
  "tracing",
 ]
