@@ -51,7 +51,7 @@ crate::command! {
 
                 let filtered_categories = CATEGORIES.iter()
                 .filter(|&c| match *c.0 {
-                    OWNER_CATEGORY => is_owner(&msg.author.id.to_string()),
+                    OWNER_CATEGORY => is_owner(msg.author.id.to_string()),
                     _ => true
                 });
 

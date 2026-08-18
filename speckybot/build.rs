@@ -52,10 +52,8 @@ pub fn collect_rs_files_recursive(
         let path = entry.path();
         
         if path.is_dir() {
-            if let Some(dir_name) = path.file_name() {
-                if dir_name != "." && dir_name != ".." {
-                    collect_rs_files_recursive(base_dir, path.to_str().unwrap(), files)?;
-                }
+            if path.file_name().filter(|&dir_name| dir_name != "." && dir_name != "..").is_some() {
+                collect_rs_files_recursive(base_dir, path.to_str().unwrap(), files)?;
             }
         } else if path.extension().and_then(|s| s.to_str()) == Some("rs") {
             // Get relative path from base_dir
@@ -66,13 +64,11 @@ pub fn collect_rs_files_recursive(
             if let Ok(relative_path) = path.strip_prefix(base_dir) {
                 let rel_path_str = relative_path.to_string_lossy().to_string();
                 
-                if let Some(file_name) = path.file_name() {
-                    if let Some(name) = file_name.to_str() {
-                        // Skip mod.rs files
-                        if name != "mod.rs" {
-                            let path_without_ext = rel_path_str.trim_end_matches(".rs").to_string();
-                            files.push((path_without_ext, rel_path_str));
-                        }
+                if let Some(file_name) = path.file_name().map(|name| name.to_string_lossy()) {
+                    // Skip mod.rs files
+                    if file_name != "mod.rs" {
+                        let path_without_ext = rel_path_str.trim_end_matches(".rs").to_string();
+                        files.push((path_without_ext, rel_path_str));
                     }
                 }
             }
@@ -123,24 +119,22 @@ fn extract_command_names_from_tokens(tokens: TokenStream) -> Vec<String> {
     let mut stream = tokens.into_iter().peekable();
 
     while let Some(token) = stream.next() {
-        if let TokenTree::Ident(ident) = &token {
-            if ident == "names" {
-                if matches!(stream.peek(), Some(TokenTree::Punct(p)) if p.as_char() == ':') {
-                    stream.next();
-                }
+        if let TokenTree::Ident(ident) = &token && ident == "names" {
+            if matches!(stream.peek(), Some(TokenTree::Punct(p)) if p.as_char() == ':') {
+                stream.next();
+            }
 
-                let mut expr_tokens = Vec::new();
-                while let Some(next) = stream.next() {
-                    if matches!(&next, TokenTree::Punct(p) if p.as_char() == ',') {
-                        break;
-                    }
-                    expr_tokens.push(next);
+            let mut expr_tokens = Vec::new();
+            for next in stream.by_ref() {
+                if matches!(&next, TokenTree::Punct(p) if p.as_char() == ',') {
+                    break;
                 }
+                expr_tokens.push(next);
+            }
 
-                let expr_stream = TokenStream::from_iter(expr_tokens);
-                if let Ok(expr) = syn::parse2::<Expr>(expr_stream) {
-                    values.extend(parse_name_expr(&expr));
-                }
+            let expr_stream = TokenStream::from_iter(expr_tokens);
+            if let Ok(expr) = syn::parse2::<Expr>(expr_stream) {
+                values.extend(parse_name_expr(&expr));
             }
         }
     }

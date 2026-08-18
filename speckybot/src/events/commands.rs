@@ -65,8 +65,8 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                                 ),
                             ).await;
 
-                            if let Some(specky_projects) = ctx.cache.guild(SPECKY_PROJECTS_GUILD) {
-                                if let Some(command_errors) = specky_projects.channels.get(&COMMAND_ERRORS_CHANNEL) {
+                            if let Some(specky_projects) = ctx.cache.guild(SPECKY_PROJECTS_GUILD)
+                                && let Some(command_errors) = specky_projects.channels.get(&COMMAND_ERRORS_CHANNEL) {
                                     let guild = msg.guild(&ctx.cache);
                                     
                                     let message_output = [
@@ -74,7 +74,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                                         guild.as_ref()
                                             .and_then(|guild| guild.channels.get(&msg.channel_id))
                                             .map(|channel| format!("Channel: {} ({})", channel, channel.id)),
-                                        guild.map(|guild| format!("Guild: {} ({})", &guild.name, guild.id)),
+                                        guild.map(|guild| format!("Guild: {} ({})", guild.name, guild.id)),
                                         COMMANDS_MAP
                                             .get(lowercase_command.as_str())
                                             .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.names[0])),
@@ -86,7 +86,6 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
 
                                     let _ = command_errors.send_message(&ctx.http, CreateMessage::new().content(message_output)).await;
                                 }
-                            }
                         }
                     })
                 }
