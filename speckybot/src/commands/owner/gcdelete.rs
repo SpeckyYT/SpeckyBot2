@@ -9,7 +9,7 @@ crate::command! {
     run: |ctx, msg, data| {
         let gc_messages = gc_messages();
 
-        let Ok(m_id) = data.content.parse().map(|id| MessageId::new(id)) else {
+        let Ok(m_id) = data.cmd_content.parse().map(|id| MessageId::new(id)) else {
             return Err(anyhow!("Input message ID isn't valid"));
         };
             

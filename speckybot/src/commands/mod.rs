@@ -34,8 +34,28 @@ pub struct CommandMetadata {
 #[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
 pub struct ParsedCommandData {
+    /// # content
+    /// ```
+    /// "sb!help help"
+    ///  ^^^^^^^^^^^^
+    /// "sb!help help"
+    /// ```
+    /// Contains exactly the same content as `msg.content`
     pub content: String,
+    /// # cmd_content
+    /// ```
+    /// "sb!help help"
+    ///          ^^^^
+    ///         "help"
+    /// ```
+    /// Filters out the prefix and command and trims start
     pub cmd_content: String,
+    /// # args
+    /// ```
+    /// "sb!help arg1 arg2 arg3 arg4 arg5"
+    ///          ^^^^ ^^^^ ^^^^ ^^^^ ^^^^
+    /// ["arg1","arg2","arg3","arg4","arg5"]
+    /// ```
     pub args: Vec<String>,
 }
 
