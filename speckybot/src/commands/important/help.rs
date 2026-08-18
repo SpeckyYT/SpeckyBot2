@@ -3,28 +3,10 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::{PREFIX, is_owner}, events::commands::ONWER_ERROR, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{commands::{self, CATEGORIES, COMMANDS_MAP, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::{PREFIX, is_owner}, events::commands::ONWER_ERROR, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed}};
 
-macro_rules! holy_cow {
-    ($name:ident $($($f:ident)? $str:literal $(($($a:tt)*))?),* $(,)*) => {
-        lazy_static::lazy_static!{
-            static ref $name: [Cow<'static, str>; [$($str),*].len()] = [
-                $(
-                    holy_cow!(@ $($f)? $str $(; ($($a)*))?),
-                )*
-            ];
-        }
-    };
-    (@$str:literal) => {
-        Cow::Borrowed($str)
-    };
-    (@ format $str:expr $(; $($a:tt)*)?) => {
-        Cow::Owned(format!($str $(, $($a)*)?))
-    };
-}
 holy_cow![
     DID_U_KNOW
-
     // "you can use the `${bot.config.prefix}usersettings` command to personalize your experience!",
     // "you can send a message that contains `:EMB:` to turn your message into an embed!",
     // "you can include `--emb` in the `${bot.config.prefix}say` command to turn the text into an embed!",
@@ -34,9 +16,9 @@ holy_cow![
     // "in any text channel, you can include `[ONE-WORD]` in the channel topic, so all users can only type one word per message!",
     // "in any text channel, you can include `[NO-MEDIA]` in the channel topic, so nobody can share links/images in the channel!",
     // "in any text channel, you can include `[NO-NSFW]` in the channel topic, so every NSFW command is not executable!",
-    format "commands usually have aliases? Just execute the command `{}help <command>` to check them!" (&*PREFIX),
+    format!("commands usually have aliases? Just execute the command `{}help <command>` to check them!", &*PREFIX),
     "most of the people don't read the helpful tricks that are written here?",
-    format "I am a bot and I'm forced for my entire life to do this 😭 Please send help, `{}donation`" (&*PREFIX),
+    format!("I am a bot and I'm forced for my entire life to do this 😭 Please send help, `{}donation`", &*PREFIX),
 ];
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],

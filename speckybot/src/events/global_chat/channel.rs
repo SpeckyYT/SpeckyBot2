@@ -9,7 +9,7 @@ pub async fn on_ready(ctx: &Context, ready: &Ready) {
 pub async fn on_channel_update(ctx: &Context, old: Option<&GuildChannel>, new: &GuildChannel) {
     let announce_and_add = async || {
         let gc_channels = gc_channels();
-        let _ = new.send_message(&ctx.http, CreateMessage::new().embed(global_chat_rules(gc_channels.len()))).await;
+        let _ = new.send_message(&ctx.http, CreateMessage::new().embed(global_chat_rules())).await;
         gc_channels.insert(new.id);
     };
 

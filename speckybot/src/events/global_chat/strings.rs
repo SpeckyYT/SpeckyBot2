@@ -1,6 +1,8 @@
 use serenity::all::CreateEmbedFooter;
 use serenity::builder::CreateEmbed;
 
+use crate::events::global_chat::gc_channels;
+
 pub struct Emotes {
     pub not_twice: &'static str,
     pub too_long: &'static str,
@@ -14,7 +16,7 @@ const EMOTES: Emotes = Emotes {
     too_long: "📏",
 };
 
-pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
+pub fn global_chat_rules() -> CreateEmbed {
     let user_rules = [
         "Be sure to follow the following rules!",
         "No NSFW/NSFL or similars. Don't send anything related to +18/illegal/disturbing/unsettling content.",
@@ -120,5 +122,5 @@ pub fn global_chat_rules(global_chats_count: usize) -> CreateEmbed {
         .field("Reactions", reactions.join("\n"), false)
         .field("Notes", format!("```diff\n{}\n```", format_notes(&notes)), false)
         .field("TL;DR", format!("```md\n{}\n```", format_tldr(&tldr)), false)
-        .footer(CreateEmbedFooter::new(format!("{} Global Chats Connected", global_chats_count)))
+        .footer(CreateEmbedFooter::new(format!("{} Global Chats Connected", gc_channels().len())))
 }
