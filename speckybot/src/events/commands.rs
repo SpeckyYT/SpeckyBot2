@@ -1,6 +1,7 @@
+use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, OWNER_CATEGORY, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::embed::{default_embed, error_embed}};
+use crate::{commands::{self, COMMANDS_MAP, OWNER_CATEGORY, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
 
 pub const ONWER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
@@ -44,24 +45,56 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 args: arguments_iter.map(|s| s.to_string()).collect(),
             };
 
-            tokio::spawn(async move {
-                let future = run(&ctx, &msg, cmd_data);
-                if let Err(err) = future.await {
-                    let _ = msg.channel_id.send_message(
-                        &ctx.http,
-                        CreateMessage::new().embed(
-                            error_embed()
-                            .description(format!("{err}"))
-                        ),
-                    ).await;
+            let ctx = ctx.clone();
+            let msg = msg.clone();
+
+            tokio::task::spawn_blocking(move || {
+                let ctx = ctx;
+                let msg = msg;
+                
+                if let Ok(runtime) = tokio::runtime::Handle::try_current() {
+                    runtime.block_on(async {
+                        if let Err(err) = run(&ctx, &msg, cmd_data).await {
+                            let error_block = format!("```\n{err}\n```");
+
+                            let _ = msg.channel_id.send_message(
+                                &ctx.http,
+                                CreateMessage::new().embed(
+                                    error_embed()
+                                    .description(&error_block)
+                                ),
+                            ).await;
+
+                            if let Some(specky_projects) = ctx.cache.guild(SPECKY_PROJECTS_GUILD) {
+                                if let Some(command_errors) = specky_projects.channels.get(&COMMAND_ERRORS_CHANNEL) {
+                                    let guild = msg.guild(&ctx.cache);
+                                    
+                                    let message_output = [
+                                        Some(format!("Author: {} ({})", msg.author, msg.author.id)),
+                                        guild.as_ref()
+                                            .and_then(|guild| guild.channels.get(&msg.channel_id))
+                                            .map(|channel| format!("Channel: {} ({})", channel, channel.id)),
+                                        guild.map(|guild| format!("Guild: {} ({})", &guild.name, guild.id)),
+                                        COMMANDS_MAP
+                                            .get(lowercase_command.as_str())
+                                            .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.names[0])),
+                                        Some(error_block),
+                                    ]
+                                    .into_iter()
+                                    .flatten()
+                                    .join("\n");
+
+                                    let _ = command_errors.send_message(&ctx.http, CreateMessage::new().content(message_output)).await;
+                                }
+                            }
+                        }
+                    })
                 }
             });
         },
         None => {
             if let Some(category_help) = commands::check_category_command(&lowercase_command) {
-                tokio::spawn(async move {
-                    let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await; 
-                });
+                let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await;
             };
         },
     }
