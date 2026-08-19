@@ -1,11 +1,11 @@
 use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, COMMANDS_MAP, OWNER_CATEGORY, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
+use crate::{commands::{self, COMMANDS_MAP, NSFW_CATEGORY, OWNER_CATEGORY, ParsedCommandData, get_command}, env::{PREFIX, is_owner}, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
 
 pub const ONWER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
-// const NSFW_ERROR: &str      =  "🔞 This command is only allowed in NSFW channels.";
+pub const NSFW_ERROR: &str      =  "🔞 This command is only allowed in NSFW channels.";
 // const USER_PERM_ERROR: &str =  "🚷 You don't have the required permissions for that command.";
 // const SERVER_ERROR: &str    =  "⛔ This command isn't available on this server.";
 // const CHANNEL_ERROR: &str   =  "⛔ This command isn't available in this channel.";
@@ -34,6 +34,23 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                     CreateMessage::new().embed(
                         error_embed()
                         .description(ONWER_ERROR)
+                    )
+                ).await;
+                return;
+            }
+
+            let is_nsfw = msg.guild(&ctx.cache).as_ref()
+                .and_then(|g| g.channels.get(&msg.channel_id))
+                .map(|c| c.nsfw)
+                .unwrap_or(false);
+
+            if metadata.category == NSFW_CATEGORY && !is_nsfw {
+                // TODO: "illegal" feature
+                let _ = msg.channel_id.send_message(
+                    &ctx.http,
+                    CreateMessage::new().embed(
+                        error_embed()
+                        .description(NSFW_ERROR)
                     )
                 ).await;
                 return;

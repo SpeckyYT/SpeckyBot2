@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY}, env::{PREFIX, is_owner}, events::commands::ONWER_ERROR, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, IMPORTANT_CATEGORY, NSFW_CATEGORY, OWNER_CATEGORY}, env::{PREFIX, is_owner}, events::commands::{NSFW_ERROR, ONWER_ERROR}, holy_cow, util::{bot_user::bot_avatar_url, channels::is_nsfw_channel, embed::default_embed}};
 
 holy_cow![
     DID_U_KNOW
@@ -28,6 +28,9 @@ crate::command! {
         let embed = match data.args.first().map(|cmd| commands::get_command(&cmd.to_lowercase())) {
             // OWNER COMMAND AND IS NOT OWNER
             Some(Some((cmd,_))) if cmd.category == OWNER_CATEGORY && !is_owner(msg.author.id.to_string()) => embed.description(ONWER_ERROR),
+            // NSFW COMMAND AND IS NOT IN NSFW CHANNEL
+            Some(Some((cmd,_))) if cmd.category == NSFW_CATEGORY && !is_nsfw_channel(ctx, msg) => embed.description(NSFW_ERROR),
+            
             // COMMAND FOUND
             Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
                 let mut command_info = format!(

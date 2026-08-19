@@ -22,6 +22,7 @@ pub const IMPORTANT_CATEGORY: &str = "important";
 pub const MATH_CATEGORY: &str = "math";
 pub const OWNER_CATEGORY: &str = "owner";
 pub const GAMES_CATEGORY: &str = "games";
+pub const NSFW_CATEGORY: &str = "nsfw";
 
 #[derive(Debug, Clone, Copy)]
 pub struct CommandMetadata {
