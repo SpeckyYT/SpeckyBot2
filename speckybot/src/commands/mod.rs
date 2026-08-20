@@ -1,7 +1,8 @@
 use itertools::Itertools;
+use serenity::all::{Context, Message};
 use std::pin::Pin;
 
-use crate::{env::PREFIX, output_file, util::string::uppercase_first_char};
+use crate::{env::{PREFIX, is_owner}, output_file, util::{channels::is_nsfw_channel, string::uppercase_first_char}};
 
 pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
 pub type RunFunction = Box<
@@ -23,6 +24,15 @@ pub const MATH_CATEGORY: &str = "math";
 pub const OWNER_CATEGORY: &str = "owner";
 pub const GAMES_CATEGORY: &str = "games";
 pub const NSFW_CATEGORY: &str = "nsfw";
+
+pub const OWNER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
+// const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
+pub const NSFW_ERROR: &str      =  "🔞 This command is only allowed in NSFW channels.";
+// const USER_PERM_ERROR: &str =  "🚷 You don't have the required permissions for that command.";
+// const SERVER_ERROR: &str    =  "⛔ This command isn't available on this server.";
+// const CHANNEL_ERROR: &str   =  "⛔ This command isn't available in this channel.";
+// const USER_ERROR: &str      =  "⛔ This command isn't available for you.";
+// const OFFICIAL_ERROR: &str  =  "🤖 This is the official SpeckyBot.";
 
 #[derive(Debug, Clone, Copy)]
 pub struct CommandMetadata {
@@ -143,6 +153,14 @@ macro_rules! commands {
 #[inline]
 pub fn get_command(command_name: &str) -> Option<&'static (CommandMetadata, RunFunction)> {
     COMMANDS_MAP.get(command_name)
+}
+
+pub fn is_category_allowed(ctx: &Context, msg: &Message, category: &str) -> Result<(), &'static str> {
+    match category {
+        OWNER_CATEGORY if !is_owner(msg.author.id.to_string()) => Err(OWNER_ERROR),
+        NSFW_CATEGORY if !is_nsfw_channel(ctx, msg) => Err(NSFW_ERROR),
+        _ => Ok(()),
+    }
 }
 
 pub fn check_category_command(category: &str) -> Option<String> {
