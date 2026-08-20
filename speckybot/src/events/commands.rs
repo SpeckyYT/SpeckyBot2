@@ -83,9 +83,15 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
             });
         },
         None => {
-            if let Some(category_help) = commands::check_category_command(&lowercase_command) {
-                let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await;
-            };
+            let is_category_allowed = is_category_allowed(&ctx, &msg, &lowercase_command);
+            let help_message = commands::check_category_command(&lowercase_command);
+
+            match (is_category_allowed, help_message) {
+                (Ok(()), Some(category_help)) => {
+                    let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await;
+                }
+                _ => {} // ignore when not allowed
+            }
         },
     }
 }

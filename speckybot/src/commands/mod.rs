@@ -155,6 +155,7 @@ pub fn get_command(command_name: &str) -> Option<&'static (CommandMetadata, RunF
     COMMANDS_MAP.get(command_name)
 }
 
+#[inline]
 pub fn is_category_allowed(ctx: &Context, msg: &Message, category: &str) -> Result<(), &'static str> {
     match category {
         OWNER_CATEGORY if !is_owner(msg.author.id.to_string()) => Err(OWNER_ERROR),
@@ -163,6 +164,7 @@ pub fn is_category_allowed(ctx: &Context, msg: &Message, category: &str) -> Resu
     }
 }
 
+#[inline]
 pub fn check_category_command(category: &str) -> Option<String> {
     CATEGORIES.get(category)
         .map(|metadatas| {
