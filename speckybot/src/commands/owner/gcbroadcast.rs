@@ -16,7 +16,7 @@ crate::command! {
             .thumbnail(&bot_avatar_url)
             .title("Broadcast!")
             .author(CreateEmbedAuthor::new(&ctx.cache.current_user().name).icon_url(&bot_avatar_url))
-            .description(&data.cmd_content)
+            .description(data.cmd_content)
             .color(Color::from_rgb(255, 0, 170));
 
         let messages = gc_channels

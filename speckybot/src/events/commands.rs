@@ -9,6 +9,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
     let content = content.trim_start_matches(char::is_whitespace);
     let mut arguments_iter = content.split(char::is_whitespace).filter(|c| !c.is_empty());
     let Some(command) = arguments_iter.next() else { return };
+    let command_length = command.len();
     let lowercase_command = command.to_lowercase();
 
     let ctx = ctx.clone();
@@ -30,18 +31,20 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 return;
             }
 
-            let cmd_data = ParsedCommandData {
-                content: content.to_string(),
-                cmd_content: content[command.len()..].trim_start().to_string(),
-                args: arguments_iter.map(|s| s.to_string()).collect(),
-            };
-
-            let ctx = ctx.clone();
-            let msg = msg.clone();
-
             tokio::task::spawn_blocking(move || {
                 let ctx = ctx;
                 let msg = msg;
+
+                let Some((_, content)) = msg.content.trim_matches(char::is_whitespace).split_once(&*PREFIX) else { return };
+                let content = content.trim_start_matches(char::is_whitespace);
+                let cmd_data = ParsedCommandData {
+                    content,
+                    cmd_content: content[command_length..].trim_start(),
+                    args: content[command_length..]
+                        .split(char::is_whitespace)
+                        .filter(|part| !part.is_empty())
+                        .collect(),
+                };
                 
                 if let Ok(runtime) = tokio::runtime::Handle::try_current() {
                     runtime.block_on(async {

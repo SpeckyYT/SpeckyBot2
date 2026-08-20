@@ -9,7 +9,7 @@ pub type RunFunction = Box<
     dyn for<'a> Fn(
         &'a serenity::client::Context,
         &'a serenity::model::channel::Message,
-        ParsedCommandData,
+        ParsedCommandData<'a>,
     ) -> RunFuture<'a>
         + Send
         + Sync,
@@ -44,7 +44,7 @@ pub struct CommandMetadata {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
-pub struct ParsedCommandData {
+pub struct ParsedCommandData<'a> {
     /// # content
     /// ```
     /// "sb!help help"
@@ -52,7 +52,7 @@ pub struct ParsedCommandData {
     /// "sb!help help"
     /// ```
     /// Contains exactly the same content as `msg.content`
-    pub content: String,
+    pub content: &'a str,
     /// # cmd_content
     /// ```
     /// "sb!help help"
@@ -60,14 +60,14 @@ pub struct ParsedCommandData {
     ///         "help"
     /// ```
     /// Filters out the prefix and command and trims start
-    pub cmd_content: String,
+    pub cmd_content: &'a str,
     /// # args
     /// ```
     /// "sb!help arg1 arg2 arg3 arg4 arg5"
     ///          ^^^^ ^^^^ ^^^^ ^^^^ ^^^^
     /// ["arg1","arg2","arg3","arg4","arg5"]
     /// ```
-    pub args: Vec<String>,
+    pub args: Vec<&'a str>,
 }
 
 #[macro_export]
@@ -87,13 +87,13 @@ macro_rules! command {
             category: [$($cat,)? $crate::commands::DEFAULT_CATEGORY][0],
         };
         
-        pub async fn run(
+        pub async fn run<'a>(
             #[allow(unused)]
-            $ctx: &serenity::client::Context,
+            $ctx: &'a serenity::client::Context,
             #[allow(unused)]
-            $msg: &serenity::model::channel::Message,
+            $msg: &'a serenity::model::channel::Message,
             #[allow(unused)]
-            $content: $crate::commands::ParsedCommandData,
+            $content: $crate::commands::ParsedCommandData<'a>,
         ) -> anyhow::Result<()> $body
 
         // // Poise slash command version
