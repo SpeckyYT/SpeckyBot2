@@ -1,11 +1,11 @@
 use futures::future::join_all;
 use serenity::all::{Color, CreateEmbedAuthor, CreateMessage};
 
-use crate::{commands::OWNER_CATEGORY, events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{bot_user::bot_avatar_url, embed::{default_embed, global_chat_embed}}};
+use crate::{events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{bot_user::bot_avatar_url, embed::{default_embed, global_chat_embed}}};
 
 crate::command! {
     names: ["gcbroadcast","gcb"],
-    category: OWNER_CATEGORY,
+    category: Owner,
     run: |ctx, msg, data| {
         let gc_channels = gc_channels();
         let gc_messages = gc_messages();

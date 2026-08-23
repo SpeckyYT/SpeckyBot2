@@ -1,10 +1,10 @@
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{commands::IMPORTANT_CATEGORY, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 crate::command! {
     names: ["donate","donations","donation","donator","patreon"],
-    category: IMPORTANT_CATEGORY,
+    category: Important,
     run: |ctx, msg, _data| {
         let _ = msg.channel_id.send_message(
             &ctx.http,

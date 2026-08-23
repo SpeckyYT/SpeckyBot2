@@ -2,11 +2,9 @@ use itertools::Itertools;
 use serenity::all::EditMessage;
 use tokio::process::Command;
 
-use crate::commands::OWNER_CATEGORY;
-
 crate::command! {
     names: "update",
-    category: OWNER_CATEGORY,
+    category: Owner,
     run: |ctx, msg, _data| {
         let mut statuses: Statuses = vec![
             (Status::Queued(false), "Reset repository instance", &["git", "reset", "--hard"]),

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, IMPORTANT_CATEGORY, OWNER_CATEGORY, is_category_allowed}, env::{PREFIX, is_owner}, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, is_category_allowed}, env::{PREFIX, is_owner}, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 holy_cow![
     DID_U_KNOW
@@ -22,7 +22,7 @@ holy_cow![
 ];
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
-    category: IMPORTANT_CATEGORY,
+    category: Important,
     run: |ctx, msg, data| {
         let embed = default_embed(Some(ctx));
 
@@ -35,9 +35,10 @@ crate::command! {
             // COMMAND FOUND
             Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
                 let mut command_info = format!(
-                    "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {category}\n**Description:** {description}\n **Usage:** {usage}\n",
+                    "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {}\n**Description:** {description}\n **Usage:** {usage}\n",
                     *PREFIX,
                     names[0],
+                    category.uppercase_first_char(),
                 );
                 if names.len() > 1 {
                     command_info.push_str(&format!("**Aliases:** {}", names.join(", ")));
@@ -56,8 +57,8 @@ crate::command! {
                 let bot_user = ctx.cache.current_user();
 
                 let filtered_categories = CATEGORIES.iter()
-                .filter(|&c| match *c.0 {
-                    OWNER_CATEGORY => is_owner(msg.author.id.to_string()),
+                .filter(|&c| match c.0 {
+                    Owner => is_owner(msg.author.id.to_string()),
                     _ => true
                 });
 
@@ -69,7 +70,9 @@ crate::command! {
                     .set_header("commands")
                     .set_align(ascii_table::Align::Right);
                 let mut table_chars = Vec::new();
-                let categories_table: Vec<_> = filtered_categories.map(|(&x,y)| [Cow::Borrowed(x), Cow::Owned(y.len().to_string())]).collect();
+                let categories_table: Vec<_> = filtered_categories
+                    .map(|(x,y)| [x.uppercase_first_char().to_string(), y.len().to_string()])
+                    .collect();
                 table.writeln(&mut table_chars, &categories_table)?;
                 let table_string = format!("```\n{}\n```", String::from_utf8_lossy(&table_chars));
 

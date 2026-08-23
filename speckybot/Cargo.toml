@@ -9,6 +9,7 @@ anyhow = { workspace = true }
 ascii_table = { workspace = true }
 dashmap = { workspace = true }
 dotenv = { workspace = true }
+enum-map = { workspace = true }
 futures = { workspace = true }
 hextool = { workspace = true }
 ilog = { workspace = true }

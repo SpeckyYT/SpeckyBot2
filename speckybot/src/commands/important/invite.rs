@@ -1,10 +1,10 @@
 use serenity::all::{CreateMessage, Permissions};
 
-use crate::{commands::IMPORTANT_CATEGORY, util::embed::default_embed};
+use crate::util::embed::default_embed;
 
 crate::command! {
     names: ["invite","inv","invit"],
-    category: IMPORTANT_CATEGORY,
+    category: Important,
     run: |ctx, msg, _data| {
         let permissions = Permissions::dm_permissions().bits();
 

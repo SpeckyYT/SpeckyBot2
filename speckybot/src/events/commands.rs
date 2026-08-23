@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, COMMANDS_MAP, ParsedCommandData, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
+use crate::{commands::{self, COMMANDS_MAP, Category, ParsedCommandData, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
@@ -85,13 +85,14 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 }
             });
         },
+        None if let Some(category) = Category::from_str(&lowercase_command) => {
+            let embed = match is_category_allowed(&ctx, &msg, category) {
+                Ok(()) => default_embed(Some(&ctx)).description(commands::category_help_message(category)),
+                Err(error) => error_embed().description(error),
+            };
+            let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(embed)).await;
+        },
         None => {
-            let is_category_allowed = is_category_allowed(&ctx, &msg, &lowercase_command);
-            let help_message = commands::check_category_command(&lowercase_command);
-
-            if let (Ok(()), Some(category_help)) = (is_category_allowed, help_message) {
-                let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(default_embed(Some(&ctx)).description(category_help))).await;
-            } // ignore when not allowed
         },
     }
 }

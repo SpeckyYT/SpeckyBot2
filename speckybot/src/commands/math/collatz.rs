@@ -1,12 +1,10 @@
 use ilog::IntLog;
 use serenity::all::CreateMessage;
 
-use crate::commands::MATH_CATEGORY;
-
 crate::command! {
     names: ["collatz", "coll"],
     usage: "[number]",
-    category: MATH_CATEGORY,
+    category: Math,
     run: |ctx, msg, data| {
         let output = match data.cmd_content.parse::<u128>() {
             Ok(mut num) => {

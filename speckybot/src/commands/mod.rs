@@ -1,8 +1,9 @@
+use enum_map::Enum;
 use itertools::Itertools;
 use serenity::all::{Context, Message};
 use std::pin::Pin;
 
-use crate::{env::{PREFIX, is_owner}, output_file, util::{channels::is_nsfw_channel, string::uppercase_first_char}};
+use crate::{env::{PREFIX, is_owner}, output_file, util::channels::is_nsfw_channel};
 
 pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
 pub type RunFunction = Box<
@@ -14,16 +15,56 @@ pub type RunFunction = Box<
         + Send
         + Sync,
 >;
-
-pub const DEFAULT_CATEGORY: &str = "uncategorized";
 pub const DEFUALT_DESCRIPTION: &str = "No description provided";
 pub const DEFUALT_USAGE: &str = "No usage provided";
 
-pub const IMPORTANT_CATEGORY: &str = "important";
-pub const MATH_CATEGORY: &str = "math";
-pub const OWNER_CATEGORY: &str = "owner";
-pub const GAMES_CATEGORY: &str = "games";
-pub const NSFW_CATEGORY: &str = "nsfw";
+#[derive(Debug, Clone, Copy, Default, Enum)]
+pub enum Category {
+    Important,
+    Games,
+    Math,
+    Nsfw,
+    Owner,
+    #[default]
+    Uncategorized,
+}
+
+impl Into<&'static str> for Category {
+    fn into(self) -> &'static str {
+        match self {
+            Category::Important => "important",
+            Category::Games => "games",
+            Category::Math => "math",
+            Category::Nsfw => "nsfw",
+            Category::Owner => "owner",
+            Category::Uncategorized => "uncategorized",
+        }
+    }
+}
+
+impl Category {
+    pub fn uppercase_first_char(self) -> &'static str {
+        match self {
+            Category::Important => "Important",
+            Category::Games => "Games",
+            Category::Math => "Math",
+            Category::Nsfw => "NSFW",
+            Category::Owner => "Owner",
+            Category::Uncategorized => "Uncategorized",
+        }
+    }
+    pub fn from_str(string: &str) -> Option<Self> {
+        Some(match string {
+            "important" => Category::Important,
+            "games" => Category::Games,
+            "math" => Category::Math,
+            "nsfw" => Category::Nsfw,
+            "owner" => Category::Owner,
+            "uncategorized" => Category::Uncategorized,
+            _ => return None,
+        })
+    }
+}
 
 pub const OWNER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
@@ -39,10 +80,9 @@ pub struct CommandMetadata {
     pub names: &'static [&'static str],
     pub description: &'static str,
     pub usage: &'static str,
-    pub category: &'static str,
+    pub category: Category,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
 pub struct ParsedCommandData<'a> {
     /// # content
@@ -80,11 +120,14 @@ macro_rules! command {
         run: |$ctx:ident, $msg:ident, $content:ident| $body:block
         $(,)*
     ) => {
+        #[allow(unused_imports)]
+        use $crate::commands::Category::*;
+
         pub const METADATA: $crate::commands::CommandMetadata = $crate::commands::CommandMetadata {
             names: command!(@names: $names),
             description: [$($desc,)? $crate::commands::DEFUALT_DESCRIPTION][0],
             usage: [$($usage,)? $crate::commands::DEFUALT_USAGE][0],
-            category: [$($cat,)? $crate::commands::DEFAULT_CATEGORY][0],
+            category: [$($cat,)? $crate::commands::Category::Uncategorized][0],
         };
         
         pub async fn run<'a>(
@@ -124,7 +167,7 @@ macro_rules! commands {
         )*
 
         use ahash::AHashMap;
-        use std::collections::BTreeMap;
+        use enum_map::EnumMap;
 
         lazy_static::lazy_static! {
             pub static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
@@ -141,9 +184,9 @@ macro_rules! commands {
                 )*
                 map
             };
-            pub static ref CATEGORIES: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = {
-                let mut commands_map: BTreeMap<&'static str, Vec<&'static CommandMetadata>> = BTreeMap::new();
-                COMMANDS_ARRAY.into_iter().for_each(|c| commands_map.entry(c.category).or_insert(Vec::with_capacity(COMMANDS_ARRAY.len())).push(c));
+            pub static ref CATEGORIES: EnumMap<Category, Vec<&'static CommandMetadata>> = {
+                let mut commands_map: EnumMap<Category, Vec<&'static CommandMetadata>> = EnumMap::from_fn(|_| vec![]);
+                COMMANDS_ARRAY.into_iter().for_each(|c| commands_map[c.category].push(c));
                 commands_map
             };
         }
@@ -156,22 +199,19 @@ pub fn get_command(command_name: &str) -> Option<&'static (CommandMetadata, RunF
 }
 
 #[inline]
-pub fn is_category_allowed(ctx: &Context, msg: &Message, category: &str) -> Result<(), &'static str> {
+pub fn is_category_allowed(ctx: &Context, msg: &Message, category: Category) -> Result<(), &'static str> {
     match category {
-        OWNER_CATEGORY if !is_owner(msg.author.id.to_string()) => Err(OWNER_ERROR),
-        NSFW_CATEGORY if !is_nsfw_channel(ctx, msg) => Err(NSFW_ERROR),
+        Category::Owner if !is_owner(msg.author.id.to_string()) => Err(OWNER_ERROR),
+        Category::Nsfw if !is_nsfw_channel(ctx, msg) => Err(NSFW_ERROR),
         _ => Ok(()),
     }
 }
 
 #[inline]
-pub fn check_category_command(category: &str) -> Option<String> {
-    CATEGORIES.get(category)
-        .map(|metadatas| {
-            #[allow(unstable_name_collisions)]
-            let commands: String = metadatas.iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
-            format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, uppercase_first_char(category))
-        })
+pub fn category_help_message(category: Category) -> String {
+    #[allow(unstable_name_collisions)]
+    let commands: String = CATEGORIES[category].iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
+    format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, category.uppercase_first_char())
 }
 
 include!(concat!(env!("OUT_DIR"), "/", output_file!()));
