@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 
-use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, is_category_allowed}, env::{PREFIX, is_owner}, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed}};
+use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, is_category_allowed}, env::{PREFIX, is_owner}, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed, string::code_block}};
 
 holy_cow![
     DID_U_KNOW
@@ -33,11 +33,11 @@ crate::command! {
             Some(Some((_, Err(error)))) => embed.description(error),
             
             // COMMAND FOUND
-            Some(Some((CommandMetadata { names, description, category, usage, .. }, _))) => {
+            Some(Some((metadata @ CommandMetadata { names, description, category, usage, .. }, _))) => {
                 let mut command_info = format!(
                     "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {}\n**Description:** {description}\n **Usage:** {usage}\n",
                     *PREFIX,
-                    names[0],
+                    metadata.name(),
                     category.pretty_name(),
                 );
                 if names.len() > 1 {
@@ -74,7 +74,7 @@ crate::command! {
                     .map(|(x,y)| [x.pretty_name().to_string(), y.len().to_string()])
                     .collect();
                 table.writeln(&mut table_chars, &categories_table)?;
-                let table_string = format!("```\n{}\n```", String::from_utf8_lossy(&table_chars));
+                let table_string = code_block(String::from_utf8_lossy(&table_chars), "");
 
                 embed
                     .description(format!("These are the available commands for {}\nThe bot prefix is: **{}**\n{table_string}", bot_user.name, *PREFIX))

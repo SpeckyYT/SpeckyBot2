@@ -2,7 +2,7 @@ use itertools::Itertools;
 use serenity::all::{Context, Message};
 use std::pin::Pin;
 
-use crate::{commands::category::Category, env::{PREFIX, is_owner}, output_file, util::channels::is_nsfw_channel};
+use crate::{commands::category::Category, env::{PREFIX, is_owner}, output_file, util::{channels::is_nsfw_channel, string::code_block}};
 
 pub mod category;
 
@@ -35,6 +35,12 @@ pub struct CommandMetadata {
     pub description: &'static str,
     pub usage: &'static str,
     pub category: Category,
+}
+
+impl CommandMetadata {
+    pub fn name(&self) -> &'static str {
+        self.names[0]
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -164,8 +170,9 @@ pub fn is_category_allowed(ctx: &Context, msg: &Message, category: Category) -> 
 #[inline]
 pub fn category_help_message(category: Category) -> String {
     #[allow(unstable_name_collisions)]
-    let commands: String = CATEGORIES[category].iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
-    format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, category.pretty_name())
+    let commands: String = CATEGORIES[category].iter().map(|c| format!("+ {}", c.name())).intersperse("\n".to_string()).collect();
+    let commands = code_block(&commands, "diff");
+    format!("The bot prefix is: **{}**\n\n> **{}**\n{commands}", *PREFIX, category.pretty_name())
 }
 
 include!(concat!(env!("OUT_DIR"), "/", output_file!()));

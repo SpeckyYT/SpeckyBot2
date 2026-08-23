@@ -2,6 +2,7 @@ use serenity::all::CreateEmbedFooter;
 use serenity::builder::CreateEmbed;
 
 use crate::events::global_chat::gc_channels;
+use crate::util::string::code_block;
 
 pub struct Emotes {
     pub not_twice: &'static str,
@@ -110,17 +111,22 @@ pub fn global_chat_rules() -> CreateEmbed {
             .join("\n")
     };
     
+    let explaination = code_block("The Global Chat is a cross-server channel which allows you to make new friends, ask questions, talk about general stuff and much more!", "fix");
+    let setup_explain = code_block("By including \"[GLOBAL]\" into a channel's topic, the channel will turn into a global-chat!", "c");
+
+    let user_rules = code_block(format_rules(&user_rules), "md");
+    let admin_rules = code_block(format_rules(&admin_rules), "md");
+    let reactions = reactions.join("\n");
+    let notes = code_block(format_notes(&notes), "diff");
+    let tldr = code_block(format_tldr(&tldr), "md");
+
     CreateEmbed::default()
         .title("Global Chat!")
-        .description(format!(
-            "```fix\n{}\n```\n```c\n{}\n```",
-            "The Global Chat is a cross-server channel which allows you to make new friends, ask questions, talk about general stuff and much more!",
-            "By including \"[GLOBAL]\" into a channel's topic, the channel will turn into a global-chat!"
-        ))
-        .field("User Rules", format!("```md\n{}\n```", format_rules(&user_rules)), false)
-        .field("Mods/Admins Rules/Informations", format!("```md\n{}\n```", format_rules(&admin_rules)), false)
-        .field("Reactions", reactions.join("\n"), false)
-        .field("Notes", format!("```diff\n{}\n```", format_notes(&notes)), false)
-        .field("TL;DR", format!("```md\n{}\n```", format_tldr(&tldr)), false)
+        .description(format!("{explaination}\n{setup_explain}"))
+        .field("User Rules", user_rules, false)
+        .field("Mods/Admins Rules/Informations", admin_rules, false)
+        .field("Reactions", reactions, false)
+        .field("Notes", notes, false)
+        .field("TL;DR", tldr, false)
         .footer(CreateEmbedFooter::new(format!("{} Global Chats Connected", gc_channels().len())))
 }

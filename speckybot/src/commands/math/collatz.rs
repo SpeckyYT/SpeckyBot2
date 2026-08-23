@@ -1,6 +1,8 @@
 use ilog::IntLog;
 use serenity::all::CreateMessage;
 
+use crate::util::string::code_block;
+
 crate::command! {
     names: ["collatz", "coll"],
     usage: "[number]",
@@ -34,7 +36,7 @@ crate::command! {
             Err(_) => "Insert number".to_string()
         };
 
-        let format_output = format!("```js\n{output}\n```");
+        let format_output = code_block(output, "js");
 
         Ok(msg.channel_id.send_message(&ctx.http, CreateMessage::new().content(format_output)).await.map(|_| ())?)
     }

@@ -3,7 +3,7 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, COMMANDS_MAP, ParsedCommandData, category::Category, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
+use crate::{commands::{self, COMMANDS_MAP, ParsedCommandData, category::Category, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}, string::code_block}};
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
@@ -51,7 +51,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 if let Ok(runtime) = tokio::runtime::Handle::try_current() {
                     runtime.block_on(async {
                         if let Err(err) = run(&ctx, &msg, cmd_data).await {
-                            let error_block = format!("```\n{err}\n```");
+                            let error_block = code_block(err.to_string(), "");
 
                             let _ = msg.channel_id.send_message(
                                 &ctx.http,
@@ -73,7 +73,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                                         guild.map(|guild| format!("Guild: {} ({})", guild.name, guild.id)),
                                         COMMANDS_MAP
                                             .get(lowercase_command.as_str())
-                                            .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.names[0])),
+                                            .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.name())),
                                         Some(error_block),
                                     ]
                                     .into_iter()

@@ -2,6 +2,8 @@ use itertools::Itertools;
 use serenity::all::EditMessage;
 use tokio::process::Command;
 
+use crate::util::string::code_block;
+
 crate::command! {
     names: "update",
     category: Owner,
@@ -72,7 +74,8 @@ fn draw_statuses(statuses: &Statuses, output: Option<&str>) -> String {
     let mut statuses = statuses.iter().map(|(status, name, _)| format!("{} {name}", status.as_emoji())).join("\n");
     
     if let Some(output) = output {
-        statuses.push_str(&format!("\n```\n{}\n```", &output[..1990_usize.saturating_sub(statuses.len())]));
+        statuses.push('\n');
+        statuses.push_str(&code_block(&output[..1990usize.saturating_sub(statuses.len())], ""));
     }
 
     statuses
