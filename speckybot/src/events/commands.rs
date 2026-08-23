@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
@@ -85,7 +87,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 }
             });
         },
-        None if let Some(category) = Category::from_str(&lowercase_command) => {
+        None if let Ok(category) = Category::from_str(&lowercase_command) => {
             let embed = match is_category_allowed(&ctx, &msg, category) {
                 Ok(()) => default_embed(Some(&ctx)).description(commands::category_help_message(category)),
                 Err(error) => error_embed().description(error),
