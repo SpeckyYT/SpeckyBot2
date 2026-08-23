@@ -63,6 +63,10 @@ pub fn collect_rs_files_recursive(
 
             if let Ok(relative_path) = path.strip_prefix(base_dir) {
                 let rel_path_str = relative_path.to_string_lossy().to_string();
+
+                if relative_path.components().count() < 2 {
+                    continue;
+                }
                 
                 if let Some(file_name) = path.file_name().map(|name| name.to_string_lossy()) {
                     // Skip mod.rs files

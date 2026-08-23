@@ -38,7 +38,7 @@ crate::command! {
                     "The bot's prefix is: `{}`\n\n**Command:** {}\n**Category:** {}\n**Description:** {description}\n **Usage:** {usage}\n",
                     *PREFIX,
                     names[0],
-                    category.uppercase_first_char(),
+                    category.pretty_name(),
                 );
                 if names.len() > 1 {
                     command_info.push_str(&format!("**Aliases:** {}", names.join(", ")));
@@ -71,7 +71,7 @@ crate::command! {
                     .set_align(ascii_table::Align::Right);
                 let mut table_chars = Vec::new();
                 let categories_table: Vec<_> = filtered_categories
-                    .map(|(x,y)| [x.uppercase_first_char().to_string(), y.len().to_string()])
+                    .map(|(x,y)| [x.pretty_name().to_string(), y.len().to_string()])
                     .collect();
                 table.writeln(&mut table_chars, &categories_table)?;
                 let table_string = format!("```\n{}\n```", String::from_utf8_lossy(&table_chars));

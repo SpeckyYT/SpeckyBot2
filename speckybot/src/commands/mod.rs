@@ -1,9 +1,10 @@
-use enum_map::Enum;
 use itertools::Itertools;
 use serenity::all::{Context, Message};
 use std::pin::Pin;
 
-use crate::{env::{PREFIX, is_owner}, output_file, util::channels::is_nsfw_channel};
+use crate::{commands::category::Category, env::{PREFIX, is_owner}, output_file, util::channels::is_nsfw_channel};
+
+pub mod category;
 
 pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
 pub type RunFunction = Box<
@@ -15,56 +16,9 @@ pub type RunFunction = Box<
         + Send
         + Sync,
 >;
+
 pub const DEFUALT_DESCRIPTION: &str = "No description provided";
 pub const DEFUALT_USAGE: &str = "No usage provided";
-
-#[derive(Debug, Clone, Copy, Default, Enum)]
-pub enum Category {
-    Important,
-    Games,
-    Math,
-    Nsfw,
-    Owner,
-    #[default]
-    Uncategorized,
-}
-
-impl Into<&'static str> for Category {
-    fn into(self) -> &'static str {
-        match self {
-            Category::Important => "important",
-            Category::Games => "games",
-            Category::Math => "math",
-            Category::Nsfw => "nsfw",
-            Category::Owner => "owner",
-            Category::Uncategorized => "uncategorized",
-        }
-    }
-}
-
-impl Category {
-    pub fn uppercase_first_char(self) -> &'static str {
-        match self {
-            Category::Important => "Important",
-            Category::Games => "Games",
-            Category::Math => "Math",
-            Category::Nsfw => "NSFW",
-            Category::Owner => "Owner",
-            Category::Uncategorized => "Uncategorized",
-        }
-    }
-    pub fn from_str(string: &str) -> Option<Self> {
-        Some(match string {
-            "important" => Category::Important,
-            "games" => Category::Games,
-            "math" => Category::Math,
-            "nsfw" => Category::Nsfw,
-            "owner" => Category::Owner,
-            "uncategorized" => Category::Uncategorized,
-            _ => return None,
-        })
-    }
-}
 
 pub const OWNER_ERROR: &str     =  "👮‍♂️ You aren't the bot owner.";
 // const BOT_PERM_ERROR: &str  =  "🚫 Bot doesn't have required permissions.";
@@ -121,13 +75,13 @@ macro_rules! command {
         $(,)*
     ) => {
         #[allow(unused_imports)]
-        use $crate::commands::Category::*;
+        use $crate::commands::category::Category::*;
 
         pub const METADATA: $crate::commands::CommandMetadata = $crate::commands::CommandMetadata {
             names: command!(@names: $names),
             description: [$($desc,)? $crate::commands::DEFUALT_DESCRIPTION][0],
             usage: [$($usage,)? $crate::commands::DEFUALT_USAGE][0],
-            category: [$($cat,)? $crate::commands::Category::Uncategorized][0],
+            category: [$($cat,)? Uncategorized][0],
         };
         
         pub async fn run<'a>(
@@ -211,7 +165,7 @@ pub fn is_category_allowed(ctx: &Context, msg: &Message, category: Category) -> 
 pub fn category_help_message(category: Category) -> String {
     #[allow(unstable_name_collisions)]
     let commands: String = CATEGORIES[category].iter().map(|c| format!("+ {}", c.names[0])).intersperse("\n".to_string()).collect();
-    format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, category.uppercase_first_char())
+    format!("The bot prefix is: **{}**\n\n> **{}**\n```diff\n{commands}\n```", *PREFIX, category.pretty_name())
 }
 
 include!(concat!(env!("OUT_DIR"), "/", output_file!()));

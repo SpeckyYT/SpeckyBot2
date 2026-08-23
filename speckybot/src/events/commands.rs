@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use serenity::all::{Context, CreateMessage, Message};
 
-use crate::{commands::{self, COMMANDS_MAP, Category, ParsedCommandData, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
+use crate::{commands::{self, COMMANDS_MAP, ParsedCommandData, category::Category, get_command, is_category_allowed}, env::PREFIX, util::{channels::{COMMAND_ERRORS_CHANNEL, SPECKY_PROJECTS_GUILD}, embed::{default_embed, error_embed}}};
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
