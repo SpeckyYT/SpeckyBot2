@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 use dotenv::dotenv;
-use lazy_static::lazy_static;
 
-lazy_static! {
+use crate::lazy_lock;
+
+lazy_lock! {
     pub static ref DOTENV: Option<PathBuf> = dotenv().ok();
     pub static ref TOKEN: String = std::env::var("DISCORD_TOKEN").expect("discord bot token [.env]");
     pub static ref PREFIX: String = std::env::var("PREFIX").expect("prefix string [.env]");

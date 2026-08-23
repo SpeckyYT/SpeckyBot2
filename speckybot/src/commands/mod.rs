@@ -129,7 +129,7 @@ macro_rules! commands {
         use ahash::AHashMap;
         use enum_map::EnumMap;
 
-        lazy_static::lazy_static! {
+        $crate::lazy_lock! {
             pub static ref COMMANDS_ARRAY: &'static [CommandMetadata] = &[ $($name::METADATA),* ];
             pub static ref COMMANDS_MAP: AHashMap<&'static str, (CommandMetadata, RunFunction)> = {
                 let mut map = AHashMap::new();

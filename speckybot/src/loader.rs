@@ -1,7 +1,7 @@
-use lazy_static::initialize;
+use std::sync::LazyLock;
 
 use crate::commands::COMMANDS_MAP;
 
 pub fn load() {
-    initialize(&COMMANDS_MAP);
+    LazyLock::force(&COMMANDS_MAP);
 }
