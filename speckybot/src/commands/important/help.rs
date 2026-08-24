@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use ascii_table::AsciiTable;
 use serenity::all::{CreateEmbedFooter, CreateMessage};
 

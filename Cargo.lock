@@ -145,6 +145,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
+name = "base-traits"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0aa49c96e3f1fd331a27a1f1e9c05323215b07b6c9ef21466cef792534737318"
+dependencies = [
+ "bt-rs",
+]
+
+[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -164,6 +173,12 @@ checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "bt-rs"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e28ef636359d6c9f59ae07a0c24e62951a5b7054d50c0b00511380a95208e5e2"
 
 [[package]]
 name = "bumpalo"
@@ -1730,6 +1745,7 @@ dependencies = [
  "ahash",
  "anyhow",
  "ascii_table",
+ "base-traits",
  "dashmap 6.2.1",
  "dotenv",
  "enum-map",

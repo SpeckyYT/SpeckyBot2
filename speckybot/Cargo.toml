@@ -7,6 +7,7 @@ edition = "2024"
 ahash = { workspace = true }
 anyhow = { workspace = true }
 ascii_table = { workspace = true }
+base-traits = { workspace = true }
 dashmap = { workspace = true }
 dotenv = { workspace = true }
 enum-map = { workspace = true }

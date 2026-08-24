@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use base_traits::AsStr;
 use enum_map::Enum;
 
 macro_rules! categories {
@@ -9,8 +10,8 @@ macro_rules! categories {
             $( $(#[$m])* $var $(= $int)?, )*
         }
 
-        impl Into<&'static str> for Category {
-            fn into(self) -> &'static str {
+        impl AsStr for Category {
+            fn as_str(&self) -> &'static str {
                 match self {
                     $(Category::$var => $lc,)*
                 }

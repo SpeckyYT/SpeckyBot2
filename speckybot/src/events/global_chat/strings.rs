@@ -75,14 +75,14 @@ lazy_lock!{
         format!("{explaination}\n{setup_explain}")
 
     };
-    pub static ref USER_RULES_STRING: String = code_block(format_lines(USER_RULES.into_iter(), |(i, rule)| {
+    pub static ref USER_RULES_STRING: String = code_block(format_lines(USER_RULES.iter(), |(i, rule)| {
         if i == 0 {
             format!("# {}", rule)
         } else {
             format!("{}. {}", i, rule)
         }
     }), "md");
-    pub static ref ADMIN_RULES_STRING: String = code_block(format_lines(ADMIN_RULES.into_iter(), |(i, rule)| {
+    pub static ref ADMIN_RULES_STRING: String = code_block(format_lines(ADMIN_RULES.iter(), |(i, rule)| {
         if i == 0 {
             format!("# {}", rule)
         } else {
@@ -90,14 +90,14 @@ lazy_lock!{
         }
     }), "md");
     pub static ref REACTIONS_STRING: String = REACTIONS.join("\n");
-    pub static ref NOTES_STRING: String = code_block(format_lines(NOTES.into_iter(), |(i, note)| {
+    pub static ref NOTES_STRING: String = code_block(format_lines(NOTES.iter(), |(i, note)| {
         if i == 0 {
             format!("+ {}", note)
         } else {
             format!("- {}", note)
         }
     }), "diff");
-    pub static ref TLDR_STRING: String = code_block(format_lines(TLDR.into_iter(), |(i, item)| {
+    pub static ref TLDR_STRING: String = code_block(format_lines(TLDR.iter(), |(i, item)| {
         if i == 0 {
             format!("# {}", item)
         } else {
