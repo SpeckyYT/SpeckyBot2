@@ -1,8 +1,8 @@
 #[macro_export]
 macro_rules! holy_cow {
-    ($name:ident $($expr:expr),* $(,)?) => {
+    ($pub:vis $name:ident<$life:lifetime, $ty:ty> $($expr:expr),* $(,)?) => {
         $crate::lazy_lock!{
-            static ref $name: [std::borrow::Cow<'static, str>; [$([stringify!($expr)].len()),*].len()] = [
+            $pub static ref $name: [std::borrow::Cow<$life, $ty>; [$([stringify!($expr)].len()),*].len()] = [
                 $($expr.into(),)*
             ];
         }

@@ -41,7 +41,7 @@ const ADMIN_RULES: &[&str] = &[
 ];
 
 holy_cow![
-    REACTIONS
+    REACTIONS<'static, str>
     "On some messages, you may get a reaction right after sending (the message gets ignored).",
     format!("{}: Don't send two or more messages in a row", EMOTES.not_twice),
     format!("{}: Your message is too big", EMOTES.too_long),

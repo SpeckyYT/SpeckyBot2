@@ -4,7 +4,7 @@ use serenity::all::{CreateEmbedFooter, CreateMessage};
 use crate::{commands::{self, CATEGORIES, COMMANDS_ARRAY, CommandMetadata, is_category_allowed}, env::{PREFIX, is_owner}, holy_cow, util::{bot_user::bot_avatar_url, embed::default_embed, string::code_block}};
 
 holy_cow![
-    DID_U_KNOW
+    DID_U_KNOW<'static, str>
     // "you can use the `${bot.config.prefix}usersettings` command to personalize your experience!",
     // "you can send a message that contains `:EMB:` to turn your message into an embed!",
     // "you can include `--emb` in the `${bot.config.prefix}say` command to turn the text into an embed!",
