@@ -11,6 +11,7 @@ base-traits = { workspace = true }
 dashmap = { workspace = true }
 dotenv = { workspace = true }
 enum-map = { workspace = true }
+fjall = "3.1.13"
 futures = { workspace = true }
 hextool = { workspace = true }
 ilog = { workspace = true }

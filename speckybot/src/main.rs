@@ -4,6 +4,7 @@ use serenity::prelude::*;
 pub mod build;
 
 pub mod env;
+pub mod db;
 pub mod loader;
 pub mod events;
 pub mod commands;
