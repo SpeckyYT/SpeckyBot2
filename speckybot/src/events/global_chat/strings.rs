@@ -13,7 +13,7 @@ pub struct Emotes {
 }
 
 
-const EMOTES: Emotes = Emotes {
+pub const EMOTES: Emotes = Emotes {
     not_twice: "2️⃣",
     no_external: "🌐",
     too_long: "📏",

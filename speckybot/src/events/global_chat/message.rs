@@ -1,8 +1,14 @@
+use std::sync::RwLock;
+
 use futures::future::join_all;
 use itertools::Itertools;
-use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent};
+use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent, ReactionType, UserId};
 
-use crate::{env::GLOBAL_CHAT, events::global_chat::{EDIT_LOCK, GCMessage, GCMessageTree, gc_channels, gc_messages}, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
+use crate::{env::{GLOBAL_CHAT, is_owner}, events::global_chat::{EDIT_LOCK, GCMessage, GCMessageTree, gc_channels, gc_messages, strings::EMOTES}, lazy_lock, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
+
+lazy_lock!{
+    static ref LAST_MESSAGE_AUTHOR: RwLock<UserId> = RwLock::new(UserId::from(0));
+}
 
 impl GCMessage {
     pub fn get_channel(&self, ctx: &Context) -> Option<GuildChannel> {
@@ -58,6 +64,20 @@ pub async fn message(ctx: &Context, msg: &Message) {
     if gc_channels.contains(&msg.channel_id) {
         let edit_lock = EDIT_LOCK.lock();
 
+        let is_last_message_author = match (is_owner(msg.author.id.to_string()), LAST_MESSAGE_AUTHOR.read()) {
+            (true, _) => false,
+            (false, Ok(id)) => msg.author.id == *id,
+            (false, Err(error)) => {
+                log_event("gc_message", format!("Failed to read last message author: {error}"));
+                false
+            },
+        };
+
+        if is_last_message_author {
+            let _ = msg.react(&ctx.http, ReactionType::Unicode(EMOTES.not_twice.to_string())).await;
+            return
+        }
+
         let gc_messages = gc_messages();
 
         let reference_family = msg.referenced_message.as_ref()
@@ -107,6 +127,9 @@ pub async fn message(ctx: &Context, msg: &Message) {
             guild_id: msg.guild_id.unwrap_or_default(),
             tree: GCMessageTree::Parent(children),
         });
+        if let Ok(mut write) = LAST_MESSAGE_AUTHOR.write() {
+            *write = msg.author.id;
+        }
 
         drop(edit_lock);
     }
