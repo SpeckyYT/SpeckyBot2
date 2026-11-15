@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 
 use fjall::{Database, Keyspace};
 
@@ -9,4 +9,13 @@ lazy_lock!{
     pub static ref BAN_KEYSPACE: anyhow::Result<Keyspace> = SPECKYBOT_DB.as_ref()
         .map_err(|error| anyhow::anyhow!("Failed to open database: {error}"))
         .and_then(|db| db.keyspace("ban", Default::default).map_err(anyhow::Error::from));
+}
+
+pub fn is_user_banned(id: impl Display) -> bool {
+    if let Ok(bans) = &*BAN_KEYSPACE {
+        if let Ok(true) = bans.contains_key(id.to_string()) {
+            return true
+        }
+    }
+    return false
 }

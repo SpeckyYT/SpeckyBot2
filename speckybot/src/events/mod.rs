@@ -2,7 +2,7 @@
 
 use serenity::{all::{ChannelId, Context, EventHandler, GuildChannel, GuildId, Message, MessageId, MessageUpdateEvent, Reaction, Ready, TypingStartEvent}, async_trait};
 
-use crate::{Bot, events, util::log::log_event};
+use crate::{Bot, db::is_user_banned, events, util::log::log_event};
 
 pub mod commands;
 pub mod global_chat;
@@ -19,6 +19,10 @@ impl EventHandler for Bot {
 
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.author.bot { return }
+        if is_user_banned(msg.author.id) {
+            return
+        }
+
         log_event("message", format!("Message {} in channel {} by {}", msg.id, msg.channel_id, msg.author.name));
 
         tokio::join!(
@@ -34,6 +38,9 @@ impl EventHandler for Bot {
             None => return,
         };
         event.apply_to_message(&mut new);
+        if is_user_banned(new.author.id) {
+            return
+        }
 
         let author = old.as_ref().or(Some(&new)).map(|m| &m.author).or(event.author.as_ref());
         if let Some(author) = author && author.bot { return }
@@ -70,8 +77,10 @@ impl EventHandler for Bot {
     }
 
     async fn reaction_add(&self, ctx: Context, add_reaction: Reaction) {        
-        if let Ok(user) = add_reaction.user(&ctx.http).await && user.bot {
-            return
+        if let Ok(user) = add_reaction.user(&ctx.http).await {
+            if user.bot || is_user_banned(user.id) {
+                return
+            }
         }
         
         log_event("reaction_add", add_reaction.emoji.to_string());
@@ -82,8 +91,10 @@ impl EventHandler for Bot {
     }
 
     async fn typing_start(&self, ctx: Context, event: TypingStartEvent) {
-        if let Ok(user) = event.user_id.to_user(&ctx.http).await && user.bot {
-            return
+        if let Ok(user) = event.user_id.to_user(&ctx.http).await {
+            if user.bot || is_user_banned(user.id) {
+                return
+            }
         }
 
         tokio::join!(
