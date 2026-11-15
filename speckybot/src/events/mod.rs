@@ -1,6 +1,7 @@
 // TODO: either add some macro system to add events really easily, or cry about it
 
 use serenity::{all::{ChannelId, Context, EventHandler, GuildChannel, GuildId, Message, MessageId, MessageUpdateEvent, Reaction, Ready, TypingStartEvent}, async_trait};
+use std::time::Instant;
 
 use crate::{Bot, db::is_user_banned, events, util::log::log_event};
 
@@ -10,6 +11,7 @@ pub mod global_chat;
 #[async_trait]
 impl EventHandler for Bot {
     async fn ready(&self, ctx: Context, ready: Ready) {
+        crate::BOT_CONNECTED_AT.get_or_init(Instant::now);
         log_event("ready", format!("Bot connected as {}", ready.user.name));
 
         tokio::join!(

@@ -22,6 +22,7 @@ proc-macro2 = { workspace = true }
 rand = { workspace = true }
 serenity = { version = "0.12.5", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "chrono", "cache"] }
 syn = { workspace = true }
+sysinfo = "0.40.3"
 tokio = { workspace = true }
 tracing = { workspace = true }
 

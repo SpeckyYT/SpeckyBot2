@@ -1,10 +1,13 @@
 use itertools::Itertools;
 use serenity::all::{Context, Message};
 use std::pin::Pin;
+use std::sync::atomic::AtomicU64;
 
 use crate::{commands::category::Category, env::{PREFIX, is_owner}, output_file, util::{channels::is_nsfw_channel, string::code_block}};
 
 pub mod category;
+
+pub static COMMANDS_EXECUTED: AtomicU64 = AtomicU64::new(0);
 
 pub type RunFuture<'a> = Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'a>>;
 pub type RunFunction = Box<

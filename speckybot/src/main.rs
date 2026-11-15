@@ -1,6 +1,9 @@
-use std::sync::LazyLock;
+use std::{sync::{LazyLock, OnceLock}, time::Instant};
 
 use serenity::prelude::*;
+
+pub static PROCESS_STARTED_AT: OnceLock<Instant> = OnceLock::new();
+pub static BOT_CONNECTED_AT: OnceLock<Instant> = OnceLock::new();
 
 #[path="../build.rs"]
 pub mod build;
@@ -18,6 +21,7 @@ struct Bot {
 
 #[tokio::main]
 async fn main() {
+    PROCESS_STARTED_AT.get_or_init(Instant::now);
     LazyLock::force(&env::DOTENV);
 
     loader::load();
