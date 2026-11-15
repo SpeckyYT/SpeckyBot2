@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use serenity::prelude::*;
 
 #[path="../build.rs"]
@@ -16,7 +18,7 @@ struct Bot {
 
 #[tokio::main]
 async fn main() {
-    let _ = env::DOTENV.as_ref();
+    LazyLock::force(&env::DOTENV);
 
     loader::load();
 

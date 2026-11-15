@@ -15,14 +15,14 @@ crate::command! {
 
         let invite = format!("https://discord.com/api/oauth2/authorize?client_id={id}&scope=bot&permissions={permissions}");
 
-        let _ = msg.channel_id.send_message(
+        msg.channel_id.send_message(
             &ctx.http,
             CreateMessage::new().embed(
                 default_embed(Some(ctx))
                 .title("Links!")
                 .description(format!("[SpeckyBot Discord Server](https://discord.gg/4EecFku)\n[Bot Invite]({invite})\n[Support This Bot](https://www.paypal.me/speckyy)"))
             )
-        ).await;
+        ).await?;
 
         Ok(())
     }

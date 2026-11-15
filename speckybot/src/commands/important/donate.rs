@@ -6,7 +6,7 @@ crate::command! {
     names: ["donate","donations","donation","donator","patreon"],
     category: Important,
     run: |ctx, msg, _data| {
-        let _ = msg.channel_id.send_message(
+        msg.channel_id.send_message(
             &ctx.http,
             CreateMessage::new().embed(
                 default_embed(Some(ctx))
@@ -14,7 +14,7 @@ crate::command! {
                 .url("https://www.paypal.me/speckyy")
                 .footer(CreateEmbedFooter::new("Thank you all for the support!").icon_url(bot_avatar_url(ctx)))
             )
-        ).await;
+        ).await?;
 
         Ok(())
     }
