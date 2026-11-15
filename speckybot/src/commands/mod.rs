@@ -77,8 +77,8 @@ macro_rules! command {
         $(description: $desc:literal,)?
         $(usage: $usage:literal,)?
         $(category: $cat:expr,)?
-        $(db: [$($keyspaces:ident),+ $(,)?],)?
-        run: |$ctx:ident, $msg:ident, $content:ident| $(($db_ident:ident, $($keyspaces_ident:ident)*))? $body:block
+        $(db: [$($keyspaces:ident),+ $(,)?] ($db_ident:ident, $($keyspaces_ident:ident)*),)?
+        run: |$ctx:ident, $msg:ident, $content:ident| $body:block
         $(,)*
     ) => {
         #[allow(unused_imports)]

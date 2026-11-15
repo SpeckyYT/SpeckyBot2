@@ -3,8 +3,8 @@ use serenity::all::CreateMessage;
 crate::command! {
     names: ["bans"],
     category: Owner,
-    db: [BAN_KEYSPACE],
-    run: |ctx, msg, data| (db, bans) {
+    db: [BAN_KEYSPACE] (db, bans),
+    run: |ctx, msg, data| {
         let bans_string = bans
             .iter()
             .map(|guard| guard.into_inner())

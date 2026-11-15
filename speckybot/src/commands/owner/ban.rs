@@ -5,8 +5,8 @@ use crate::util::embed::success_embed;
 crate::command! {
     names: ["ban"],
     category: Owner,
-    db: [BAN_KEYSPACE],
-    run: |ctx, msg, data| (db, bans) {
+    db: [BAN_KEYSPACE] (db, bans),
+    run: |ctx, msg, data| {
         let Ok(id): Result<u64, _> = data.cmd_content.parse() else {
             return Err(anyhow::anyhow!("Input is not a valid Discord ID"));
         };
