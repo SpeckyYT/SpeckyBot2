@@ -42,6 +42,7 @@ categories!{
     #[default]
     Uncategorized = 0: "uncategorized"|"Uncategorized"
     Important: "important"|"Important"
+    Dev: "dev"|"Dev"
     Games: "games"|"Games"
     Math: "math"|"Math"
     Nsfw: "nsfw"|"NSFW"
