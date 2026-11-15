@@ -160,6 +160,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "better-profanity"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15aa60497f1f101204ffdc6764f7f9a4324d8319eb0b9423630d4ba8cea61ada"
+dependencies = [
+ "rustc-hash",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1975,6 +1984,7 @@ dependencies = [
  "anyhow",
  "ascii_table",
  "base-traits",
+ "better-profanity",
  "chrono",
  "const-tools",
  "dashmap 6.2.1",
@@ -1987,6 +1997,7 @@ dependencies = [
  "itertools",
  "proc-macro2",
  "rand 0.10.3",
+ "regex",
  "serenity",
  "syn 3.0.10",
  "sysinfo",

@@ -15,6 +15,8 @@ pub mod events;
 pub mod commands;
 pub mod util;
 
+pub const DISCORD_SERVER_INVITE: &str = "https://discord.gg/4EecFku";
+
 #[derive(Default)]
 struct Bot {
 }

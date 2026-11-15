@@ -1,6 +1,6 @@
 use serenity::all::{CreateMessage, Permissions};
 
-use crate::util::embed::default_embed;
+use crate::{util::embed::default_embed, DISCORD_SERVER_INVITE};
 
 crate::command! {
     names: ["invite","inv","invit"],
@@ -21,7 +21,7 @@ crate::command! {
             CreateMessage::new().embed(
                 default_embed(Some(ctx))
                 .title("Links!")
-                .description(format!("[SpeckyBot Discord Server](https://discord.gg/4EecFku)\n[Bot Invite]({invite})\n[Support This Bot](https://www.paypal.me/speckyy)"))
+                .description(format!("[SpeckyBot Discord Server]({DISCORD_SERVER_INVITE})\n[Bot Invite]({invite})\n[Support This Bot](https://www.paypal.me/speckyy)"))
             )
         ).await?;
 

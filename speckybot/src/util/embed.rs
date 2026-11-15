@@ -1,7 +1,16 @@
+use better_profanity::Profanity;
 use hextool::Convert;
+use regex::Regex;
 use serenity::all::{Color, Context, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, CreateMessage, EditMessage, Embed, Message, Timestamp};
 
-use crate::{env::COLOR, util::bot_user::user_avatar_url};
+use crate::{DISCORD_SERVER_INVITE, env::COLOR, lazy_lock, util::bot_user::user_avatar_url};
+
+lazy_lock!{
+    static ref DISCORD_INVITE_LINK_REGEX: Regex = 
+        Regex::new(r"(?i)(?:https?://)?(?:www\.)?discord(?:app)?\.(?:gg/[A-Za-z0-9-]{2,}|com/invite/[A-Za-z0-9-]{2,})")
+            .expect("Discord invite regex must be valid");
+    static ref PROFANITY_FILTER: Profanity = Profanity::new();
+}
 
 pub fn default_embed(ctx: Option<&Context>) -> CreateEmbed {
     let mut embed = CreateEmbed::new()
@@ -57,7 +66,7 @@ pub async fn global_chat_embeds(ctx: &Context, msg: &Message) -> Vec<CreateEmbed
 pub async fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
     let mut embed = CreateEmbed::new()
     .author(CreateEmbedAuthor::new(msg.author.display_name()).icon_url(user_avatar_url(&msg.author)).url(msg.link()))
-    .description(&msg.content)
+    .description(global_chat_censor(&msg.content))
     .timestamp(msg.timestamp);
 
     if let Some(guild_id) = msg.guild_id {
@@ -74,6 +83,11 @@ pub async fn global_chat_embed(ctx: &Context, msg: &Message) -> CreateEmbed {
     }
 
     embed
+}
+
+pub fn global_chat_censor(content: &str) -> String {
+    let content = DISCORD_INVITE_LINK_REGEX.replace_all(content, DISCORD_SERVER_INVITE);
+    PROFANITY_FILTER.censor(&content, "∗")
 }
 
 pub fn embed_to_create_embed(embed: &Embed) -> CreateEmbed {
