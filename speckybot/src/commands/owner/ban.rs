@@ -4,6 +4,7 @@ use crate::util::embed::success_embed;
 
 crate::command! {
     names: ["ban"],
+    description: "Bans a user from using all bot commands",
     category: Owner,
     db: [BAN_KEYSPACE] (db, bans),
     run: |ctx, msg, data| {

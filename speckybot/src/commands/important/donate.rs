@@ -4,6 +4,7 @@ use crate::{util::{bot_user::bot_avatar_url, embed::default_embed}};
 
 crate::command! {
     names: ["donate","donations","donation","donator","patreon"],
+    description: "Gives you links to donate!",
     category: Important,
     run: |ctx, msg, _data| {
         msg.channel_id.send_message(

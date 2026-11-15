@@ -6,6 +6,7 @@ use crate::util::string::code_block;
 
 crate::command! {
     names: "update",
+    description: "Updates the bot!",
     category: Owner,
     run: |ctx, msg, _data| {
         let mut statuses: Statuses = vec![

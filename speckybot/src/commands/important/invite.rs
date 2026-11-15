@@ -4,6 +4,7 @@ use crate::util::embed::default_embed;
 
 crate::command! {
     names: ["invite","inv","invit"],
+    description: "Do you want to add this bot to your server?",
     category: Important,
     run: |ctx, msg, _data| {
         let permissions = Permissions::dm_permissions().bits();

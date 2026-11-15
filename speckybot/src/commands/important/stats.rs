@@ -5,6 +5,7 @@ use crate::{commands::COMMANDS_EXECUTED, util::embed::default_embed};
 
 crate::command! {
     names: ["stats", "status", "st"],
+    description: "Gives some stats about the bot!",
     category: Important,
     run: |ctx, msg, _data| {
         let mut system = System::new_all()?;

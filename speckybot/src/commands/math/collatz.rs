@@ -5,6 +5,7 @@ use crate::util::string::code_block;
 
 crate::command! {
     names: ["collatz", "coll"],
+    description: "Gives you the collatz sequence!",
     usage: "[number]",
     category: Math,
     run: |ctx, msg, data| {

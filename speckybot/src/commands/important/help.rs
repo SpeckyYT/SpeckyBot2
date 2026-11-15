@@ -20,6 +20,7 @@ holy_cow![
 ];
 crate::command! {
     names: ["help", "h", "halp", "hel","hwlp","hewlp","cmd","cmds","command","commands","info","informations","information","?"],
+    description: "Gives you the help page for this bot!",
     category: Important,
     run: |ctx, msg, data| {
         let embed = default_embed(Some(ctx));

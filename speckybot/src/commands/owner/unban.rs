@@ -4,6 +4,7 @@ use crate::util::embed::success_embed;
 
 crate::command! {
     names: ["unban"],
+    description: "Unbas a user from using bot commands",
     category: Owner,
     db: [BAN_KEYSPACE] (db, bans),
     run: |ctx, msg, data| {

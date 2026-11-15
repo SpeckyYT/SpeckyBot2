@@ -5,6 +5,7 @@ use crate::{events::global_chat::gc_messages, util::embed::default_embed};
 
 crate::command! {
     names: ["gcdelete","gcd"],
+    description: "Deletes a message from the global-chat!",
     category: Owner,
     run: |ctx, msg, data| {
         let gc_messages = gc_messages();

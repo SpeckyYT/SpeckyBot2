@@ -5,6 +5,7 @@ use crate::{events::global_chat::{GCMessage, GCMessageTree, gc_channels, gc_mess
 
 crate::command! {
     names: ["gcbroadcast","gcb"],
+    description: "Broadcasts a message in the global chat",
     category: Owner,
     run: |ctx, msg, data| {
         let gc_channels = gc_channels();

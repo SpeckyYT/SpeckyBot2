@@ -2,6 +2,7 @@ use serenity::all::CreateMessage;
 
 crate::command! {
     names: ["bans"],
+    description: "Shows the list of banned users",
     category: Owner,
     db: [BAN_KEYSPACE] (db, bans),
     run: |ctx, msg, data| {

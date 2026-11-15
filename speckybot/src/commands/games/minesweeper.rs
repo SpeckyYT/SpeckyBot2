@@ -38,6 +38,7 @@ const EMPTY: &str = "⬛";
 
 crate::command! {
     names: ["minesweeper","ms"],
+    description: "Gives you a minesweeper field!",
     category: GAMES_CATEGORY,
     run: |ctx, msg, _data| {
         let width = random_range(10..=12);

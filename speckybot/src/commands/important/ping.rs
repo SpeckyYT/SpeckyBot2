@@ -2,6 +2,7 @@ use serenity::all::EditMessage;
 
 crate::command! {
     names: ["ping", "pong", "pin", "pon"],
+    description: "Information about how fast the bot is! (It's not that accurate)",
     category: Important,
     run: |ctx, msg, _data| {
         let mut bot_msg = msg.channel_id.say(&ctx.http, "pong").await?;
