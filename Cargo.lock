@@ -287,8 +287,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link",
 ]
 
@@ -343,6 +345,12 @@ name = "compare"
 version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea0095f6103c2a8b44acd6fd15960c801dafebf02e21940360833e0673f48ba7"
+
+[[package]]
+name = "const-tools"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ffdf41ae1c3a2350bc18b11242b796eaa9e6b5c598eace925252e0ac0fb076e"
 
 [[package]]
 name = "core-foundation-sys"
@@ -1891,6 +1899,8 @@ dependencies = [
  "anyhow",
  "ascii_table",
  "base-traits",
+ "chrono",
+ "const-tools",
  "dashmap 6.2.1",
  "dotenv",
  "enum-map",

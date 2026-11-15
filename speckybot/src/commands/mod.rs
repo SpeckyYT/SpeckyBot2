@@ -77,19 +77,24 @@ macro_rules! command {
         $(description: $desc:literal,)?
         $(usage: $usage:literal,)?
         $(category: $cat:expr,)?
-        run: |$ctx:ident, $msg:ident, $content:ident| $body:block
+        $(db: [$($keyspaces:ident),+ $(,)?],)?
+        run: |$ctx:ident, $msg:ident, $content:ident| $(($db_ident:ident, $($keyspaces_ident:ident)*))? $body:block
         $(,)*
     ) => {
         #[allow(unused_imports)]
         use $crate::commands::category::Category::*;
 
         pub const METADATA: $crate::commands::CommandMetadata = $crate::commands::CommandMetadata {
-            names: command!(@names: $names),
+            names: command!(@to_array: $names),
             description: [$($desc,)? $crate::commands::DEFUALT_DESCRIPTION][0],
             usage: [$($usage,)? $crate::commands::DEFUALT_USAGE][0],
             category: [$($cat,)? Uncategorized][0],
         };
         
+        #[allow(unused_variables)]
+        #[allow(unused_assignments)]
+        #[allow(unused_parens)]
+        #[allow(unreachable_code)]
         pub async fn run<'a>(
             #[allow(unused)]
             $ctx: &'a serenity::client::Context,
@@ -97,7 +102,35 @@ macro_rules! command {
             $msg: &'a serenity::model::channel::Message,
             #[allow(unused)]
             $content: $crate::commands::ParsedCommandData<'a>,
-        ) -> anyhow::Result<()> $body
+        ) -> anyhow::Result<()> {
+            #[allow(unused)]
+            let mut skip_default_run = false;
+            $(
+                skip_default_run = true;
+                let Ok($db_ident) = &*$crate::db::SPECKYBOT_DB else {
+                    return Err(anyhow::anyhow!("Failed to load DB"));
+                };
+                let required_keyspaces_names = [ $(stringify!($keyspaces)),* ];
+                let required_keyspaces = [$(&*$crate::db::$keyspaces),*];
+                let [$(Ok($keyspaces_ident)),*] = required_keyspaces else {
+                    return Err(anyhow::anyhow!(
+                        "Failed to load a keyspace: {:?}",
+                        const_tools::zip!(required_keyspaces_names, required_keyspaces).map(|(name, keyspace)| {
+                            match keyspace {
+                                Ok(_) => format!("{name}: ok"),
+                                Err(error) => format!("{name}: {error}"),
+                            }
+                        }),
+                    ))
+                };
+                return $body;
+            )?
+            if !skip_default_run {
+                $body
+            } else {
+                Ok(())
+            }
+        }
 
         // // Poise slash command version
         // #[poise::command(slash_command)]
@@ -114,8 +147,8 @@ macro_rules! command {
         //     Ok(())
         // }
     };
-    (@names: $name:literal) => { &[$name] };
-    (@names: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
+    (@to_array: $name:literal) => { &[$name] };
+    (@to_array: [$($names:literal),+ $(,)?]) => { &[$($names),+] };
 }
 
 #[allow(unused)]

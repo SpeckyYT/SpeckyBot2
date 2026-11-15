@@ -26,10 +26,17 @@ pub fn default_embed(ctx: Option<&Context>) -> CreateEmbed {
 }
 
 #[inline]
+pub fn success_embed() -> CreateEmbed {
+    CreateEmbed::new()
+    .title("Success!")
+    .color(Color::from_rgb(32, 255, 32))
+}
+
+#[inline]
 pub fn error_embed() -> CreateEmbed {
     CreateEmbed::new()
     .title("ERROR!")
-    .color(Color::from_rgb(255, 0, 0))
+    .color(Color::from_rgb(255, 32, 32))
 }
 
 pub async fn global_chat_edit_message(ctx: &Context, msg: &Message) -> EditMessage {

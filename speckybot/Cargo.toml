@@ -8,10 +8,12 @@ ahash = { workspace = true }
 anyhow = { workspace = true }
 ascii_table = { workspace = true }
 base-traits = { workspace = true }
+chrono = { workspace = true }
+const-tools = { workspace = true }
 dashmap = { workspace = true }
 dotenv = { workspace = true }
 enum-map = { workspace = true }
-fjall = "3.1.13"
+fjall = { workspace = true }
 futures = { workspace = true }
 hextool = { workspace = true }
 ilog = { workspace = true }
