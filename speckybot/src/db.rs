@@ -12,10 +12,9 @@ lazy_lock!{
 }
 
 pub fn is_user_banned(id: impl Display) -> bool {
-    if let Ok(bans) = &*BAN_KEYSPACE {
-        if let Ok(true) = bans.contains_key(id.to_string()) {
+    if let Ok(bans) = &*BAN_KEYSPACE
+        && let Ok(true) = bans.contains_key(id.to_string()) {
             return true
         }
-    }
-    return false
+    false
 }

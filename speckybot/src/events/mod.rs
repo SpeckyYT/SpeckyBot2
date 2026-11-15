@@ -77,11 +77,10 @@ impl EventHandler for Bot {
     }
 
     async fn reaction_add(&self, ctx: Context, add_reaction: Reaction) {        
-        if let Ok(user) = add_reaction.user(&ctx.http).await {
-            if user.bot || is_user_banned(user.id) {
+        if let Ok(user) = add_reaction.user(&ctx.http).await
+            && (user.bot || is_user_banned(user.id)) {
                 return
             }
-        }
         
         log_event("reaction_add", add_reaction.emoji.to_string());
 
@@ -91,11 +90,10 @@ impl EventHandler for Bot {
     }
 
     async fn typing_start(&self, ctx: Context, event: TypingStartEvent) {
-        if let Ok(user) = event.user_id.to_user(&ctx.http).await {
-            if user.bot || is_user_banned(user.id) {
+        if let Ok(user) = event.user_id.to_user(&ctx.http).await
+            && (user.bot || is_user_banned(user.id)) {
                 return
             }
-        }
 
         tokio::join!(
             events::global_chat::typing::typing_start(&ctx, &event),

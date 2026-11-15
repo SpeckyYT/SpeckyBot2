@@ -18,7 +18,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
 
     match metadata_and_run {
         Some((metadata, run)) => {
-            if let Err(error_text) = is_category_allowed(&ctx, &msg, metadata.category) {
+            if let Err(error_text) = is_category_allowed(ctx, msg, metadata.category) {
                 // TODO: "illegal" feature
                 let _ = msg.channel_id.send_message(
                     &ctx.http,
@@ -86,8 +86,8 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
             });
         },
         None if let Ok(category) = Category::from_str(&lowercase_command) => {
-            let embed = match is_category_allowed(&ctx, &msg, category) {
-                Ok(()) => default_embed(Some(&ctx)).description(commands::category_help_message(category)),
+            let embed = match is_category_allowed(ctx, msg, category) {
+                Ok(()) => default_embed(Some(ctx)).description(commands::category_help_message(category)),
                 Err(error) => error_embed().description(error),
             };
             let _ = msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(embed)).await;

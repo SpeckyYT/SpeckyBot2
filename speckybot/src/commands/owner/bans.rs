@@ -7,8 +7,7 @@ crate::command! {
     run: |ctx, msg, data| {
         let bans_string = bans
             .iter()
-            .map(|guard| guard.into_inner())
-            .flatten()
+            .flat_map(|guard| guard.into_inner())
             .fold(String::new(), |mut string, (id, time)| {
                 string.push_str(&String::from_utf8_lossy(id.as_slice()));
                 string.push_str(": ");
