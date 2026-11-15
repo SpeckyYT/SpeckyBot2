@@ -33,10 +33,7 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 return;
             }
 
-            tokio::task::spawn_blocking(move || {
-                let ctx = ctx;
-                let msg = msg;
-
+            tokio::spawn(async move {
                 let Some((_, content)) = msg.content.trim_matches(char::is_whitespace).split_once(&*PREFIX) else { return };
                 let content = content.trim_start_matches(char::is_whitespace);
                 let cmd_data = ParsedCommandData {
@@ -48,42 +45,41 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                         .collect(),
                 };
                 
-                if let Ok(runtime) = tokio::runtime::Handle::try_current() {
-                    runtime.block_on(async {
-                        if let Err(err) = run(&ctx, &msg, cmd_data).await {
-                            let error_block = code_block(err.to_string(), "");
+                if let Err(err) = run(&ctx, &msg, cmd_data).await {
+                    let error_block = code_block(err.to_string(), "");
 
-                            let _ = msg.channel_id.send_message(
-                                &ctx.http,
-                                CreateMessage::new().embed(
-                                    error_embed()
-                                    .description(&error_block)
-                                ),
-                            ).await;
+                    let _ = msg.channel_id.send_message(
+                        &ctx.http,
+                        CreateMessage::new().embed(
+                            error_embed()
+                            .description(&error_block)
+                        ),
+                    ).await;
 
-                            if let Some(specky_projects) = ctx.cache.guild(SPECKY_PROJECTS_GUILD)
-                                && let Some(command_errors) = specky_projects.channels.get(&COMMAND_ERRORS_CHANNEL) {
-                                    let guild = msg.guild(&ctx.cache);
-                                    
-                                    let message_output = [
-                                        Some(format!("Author: {} ({})", msg.author, msg.author.id)),
-                                        guild.as_ref()
-                                            .and_then(|guild| guild.channels.get(&msg.channel_id))
-                                            .map(|channel| format!("Channel: {} ({})", channel, channel.id)),
-                                        guild.map(|guild| format!("Guild: {} ({})", guild.name, guild.id)),
-                                        COMMANDS_MAP
-                                            .get(lowercase_command.as_str())
-                                            .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.name())),
-                                        Some(error_block),
-                                    ]
-                                    .into_iter()
-                                    .flatten()
-                                    .join("\n");
+                    let command_errors_channel = ctx.cache.guild(SPECKY_PROJECTS_GUILD)
+                        .and_then(|guild| guild.channels.get(&COMMAND_ERRORS_CHANNEL).map(|channel| channel.id));
 
-                                    let _ = command_errors.send_message(&ctx.http, CreateMessage::new().content(message_output)).await;
-                                }
-                        }
-                    })
+                    if let Some(command_errors_channel) = command_errors_channel {
+                        let message_output = {
+                            let guild = msg.guild(&ctx.cache);
+                            [
+                                Some(format!("Author: {} ({})", msg.author, msg.author.id)),
+                                guild.as_ref()
+                                    .and_then(|guild| guild.channels.get(&msg.channel_id))
+                                    .map(|channel| format!("Channel: {} ({})", channel, channel.id)),
+                                guild.map(|guild| format!("Guild: {} ({})", guild.name, guild.id)),
+                                COMMANDS_MAP
+                                    .get(lowercase_command.as_str())
+                                    .map(|(metadata, _)| format!("Command: {lowercase_command} ({})", metadata.name())),
+                                Some(error_block),
+                            ]
+                            .into_iter()
+                            .flatten()
+                            .join("\n")
+                        };
+
+                        let _ = command_errors_channel.send_message(&ctx.http, CreateMessage::new().content(message_output)).await;
+                    }
                 }
             });
         },
