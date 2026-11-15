@@ -7,15 +7,12 @@ use crate::{commands::{self, COMMANDS_MAP, ParsedCommandData, category::Category
 
 pub async fn on_message(ctx: &Context, msg: &Message) {
     if msg.author.bot { return }
-    let Some((_, content)) = msg.content.trim_matches(char::is_whitespace).split_once(&*PREFIX) else { return };
-    let content = content.trim_start_matches(char::is_whitespace);
-    let mut arguments_iter = content.split(char::is_whitespace).filter(|c| !c.is_empty());
+    let Some((_prefix, unprefixed_content)) = msg.content.trim_matches(char::is_whitespace).split_once(&*PREFIX) else { return };
+    let unprefixed_content = unprefixed_content.trim_start_matches(char::is_whitespace);
+    let mut arguments_iter = unprefixed_content.split(char::is_whitespace).filter(|c| !c.is_empty());
     let Some(command) = arguments_iter.next() else { return };
     let command_length = command.len();
     let lowercase_command = command.to_lowercase();
-
-    let ctx = ctx.clone();
-    let msg = msg.clone();
 
     let metadata_and_run = get_command(&lowercase_command);
 
@@ -33,13 +30,18 @@ pub async fn on_message(ctx: &Context, msg: &Message) {
                 return;
             }
 
+            let unprefixed_content = unprefixed_content.to_string();
+            let ctx = ctx.clone();
+            let msg = msg.clone();
+
             tokio::spawn(async move {
-                let Some((_, content)) = msg.content.trim_matches(char::is_whitespace).split_once(&*PREFIX) else { return };
-                let content = content.trim_start_matches(char::is_whitespace);
+                let cmd_content = unprefixed_content[command_length..].trim_start();
+
                 let cmd_data = ParsedCommandData {
-                    content,
-                    cmd_content: content[command_length..].trim_start(),
-                    args: content[command_length..]
+                    content: &msg.content,
+                    unprefixed_content: &unprefixed_content,
+                    cmd_content,
+                    args: cmd_content
                         .split(char::is_whitespace)
                         .filter(|part| !part.is_empty())
                         .collect(),

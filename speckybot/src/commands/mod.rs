@@ -53,6 +53,14 @@ pub struct ParsedCommandData<'a> {
     /// ```
     /// Contains exactly the same content as `msg.content`
     pub content: &'a str,
+    /// # unprefixed_content
+    /// ```
+    /// "sb!help help"
+    ///     ^^^^ ^^^^
+    ///    "help help"
+    /// ```
+    /// Removes the prefix from the content
+    pub unprefixed_content: &'a str,
     /// # cmd_content
     /// ```
     /// "sb!help help"
