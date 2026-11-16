@@ -7,7 +7,7 @@ use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId,
 use crate::{env::{GLOBAL_CHAT, is_owner}, events::global_chat::{EDIT_LOCK, GCMessage, GCMessageTree, gc_channels, gc_messages, strings::EMOTES}, lazy_lock, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
 
 lazy_lock!{
-    static ref LAST_MESSAGE_AUTHOR: RwLock<UserId> = RwLock::new(UserId::from(0));
+    static ref LAST_MESSAGE_AUTHOR: RwLock<UserId> = RwLock::new(UserId::default());
 }
 
 impl GCMessage {
