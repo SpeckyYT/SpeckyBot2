@@ -35,7 +35,10 @@ async fn main() {
         | GatewayIntents::MESSAGE_CONTENT
         | GatewayIntents::GUILDS
         | GatewayIntents::GUILD_MESSAGE_TYPING
-        | GatewayIntents::GUILD_MESSAGE_REACTIONS;
+        | GatewayIntents::GUILD_MESSAGE_REACTIONS
+        | GatewayIntents::DIRECT_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGE_TYPING
+        | GatewayIntents::DIRECT_MESSAGE_REACTIONS;
 
     let mut client = Client::builder(&*env::TOKEN, intents)
         .event_handler(bot)
