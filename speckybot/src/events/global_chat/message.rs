@@ -2,13 +2,17 @@ use std::sync::RwLock;
 
 use futures::future::join_all;
 use itertools::Itertools;
-use serenity::all::{Context, CreateAttachment, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent, ReactionType, UserId};
+use regex::Regex;
+use serenity::all::{Context, CreateAttachment, EmojiId, GuildChannel, Message, MessageId, MessageReference, MessageReferenceKind, MessageUpdateEvent, ReactionType, UserId};
 
 use crate::{env::{GLOBAL_CHAT, is_owner}, events::global_chat::{EDIT_LOCK, GCMessage, GCMessageTree, gc_channels, gc_messages, strings::EMOTES}, lazy_lock, util::{embed::{global_chat_edit_message, global_chat_message}, log::log_event}};
 
 lazy_lock!{
     static ref LAST_MESSAGE_AUTHOR: RwLock<UserId> = RwLock::new(UserId::default());
+    static ref EMOTES_REGEX: Regex = Regex::new(r"<a?:[\w]+:(\d{17,20})>").expect("Discord emote regex must be valid");
 }
+
+const MAX_LINES: usize = 15;
 
 impl GCMessage {
     pub fn get_channel(&self, ctx: &Context) -> Option<GuildChannel> {
@@ -75,6 +79,31 @@ pub async fn message(ctx: &Context, msg: &Message) {
 
         if is_last_message_author {
             let _ = msg.react(&ctx.http, ReactionType::Unicode(EMOTES.not_twice.to_string())).await;
+            return
+        }
+
+        if msg.content.len() > MAX_LINES {
+            let _ = msg.react(&ctx.http, ReactionType::Unicode(EMOTES.too_long.to_string())).await;
+            return
+        }
+
+        let has_unavailable_emote = EMOTES_REGEX.captures_iter(&msg.content).any(|capture| {
+            capture.get(1)
+            .and_then(|id| id.as_str().parse::<u64>().ok())
+            .map(EmojiId::from)
+            .map(|emote_id|
+                !ctx.cache.guilds().iter()
+                .any(|guild_id| {
+                    ctx.cache
+                    .guild(*guild_id)
+                    .is_some_and(|guild| guild.emojis.contains_key(&emote_id))
+                })
+            )
+            .unwrap_or(false)
+        });
+
+        if has_unavailable_emote {
+            let _ = msg.react(&ctx.http, ReactionType::Unicode(EMOTES.no_external.to_string())).await;
             return
         }
 
